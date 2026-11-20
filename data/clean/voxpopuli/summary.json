@@ -1,0 +1,215 @@
+{
+  "corpus": "VoxPopuli, Hungarian (hu): clean references for the clips of the raw folder",
+  "splits": {
+    "train": {
+      "clips": 4597,
+      "hours": 13.998,
+      "speakers": 20,
+      "sessions": 626
+    },
+    "validation": {
+      "clips": 826,
+      "hours": 2.499,
+      "speakers": 15,
+      "sessions": 112
+    },
+    "test": {
+      "clips": 897,
+      "hours": 2.412,
+      "speakers": 34,
+      "sessions": 104
+    }
+  },
+  "speakers_in_two_splits": {
+    "train-validation": 0,
+    "train-test": 0,
+    "validation-test": 0
+  },
+  "sessions_in_two_splits": {
+    "train-validation": 0,
+    "train-test": 0,
+    "validation-test": 0
+  },
+  "references_also_in_training": {
+    "validation": {
+      "clips": 6,
+      "of": 826
+    },
+    "test": {
+      "clips": 7,
+      "of": 897
+    }
+  },
+  "english_number_words": {
+    "train": {
+      "clips": 286,
+      "raw_text_has_digits": 223,
+      "no_raw_text": 62,
+      "raw_text_without_digits": 1
+    },
+    "validation": {
+      "clips": 55,
+      "raw_text_has_digits": 46,
+      "no_raw_text": 9,
+      "raw_text_without_digits": 0
+    },
+    "test": {
+      "clips": 35,
+      "raw_text_has_digits": 28,
+      "no_raw_text": 6,
+      "raw_text_without_digits": 1
+    }
+  },
+  "reference_repair": {
+    "letter": "í",
+    "clips": {
+      "no_raw_text": 147,
+      "restored": 2666,
+      "unchanged": 3507
+    },
+    "restored_words": 3962,
+    "restored_letters": 3964,
+    "clips_with_words_that_could_not_be_aligned": 325,
+    "words_that_could_not_be_aligned": 787,
+    "words_in_clips_without_raw_text": 4294
+  },
+  "letters_of_raw_text_missing_from_normalized_text": {
+    "í": {
+      "raw_text": 3965,
+      "normalized_text": 0,
+      "reference": 3964
+    },
+    "š": {
+      "raw_text": 13,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "č": {
+      "raw_text": 7,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ş": {
+      "raw_text": 4,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ß": {
+      "raw_text": 3,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ä": {
+      "raw_text": 2,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "º": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "è": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ï": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ć": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ł": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ň": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ž": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    },
+    "ș": {
+      "raw_text": 1,
+      "normalized_text": 0,
+      "reference": 0
+    }
+  },
+  "chars_per_second": {
+    "train": {
+      "clips": 4597,
+      "min": 2.29,
+      "p1": 9.53,
+      "p5": 11.15,
+      "p25": 13.03,
+      "p50": 14.35,
+      "p75": 15.77,
+      "p95": 17.92,
+      "p99": 20.25,
+      "max": 32.14,
+      "mean": 14.44
+    },
+    "validation": {
+      "clips": 826,
+      "min": 3.62,
+      "p1": 9.11,
+      "p5": 11.67,
+      "p25": 13.56,
+      "p50": 15.06,
+      "p75": 16.56,
+      "p95": 18.79,
+      "p99": 21.06,
+      "max": 28.85,
+      "mean": 15.1
+    },
+    "test": {
+      "clips": 897,
+      "min": 6.78,
+      "p1": 9.63,
+      "p5": 11.6,
+      "p25": 13.92,
+      "p50": 15.29,
+      "p75": 16.58,
+      "p95": 18.5,
+      "p99": 20.41,
+      "max": 25.0,
+      "mean": 15.19
+    }
+  },
+  "removed_before_cleaning": {
+    "beyond_train_target": {
+      "clips": 1587,
+      "hours": 4.921
+    },
+    "beyond_validation_target": {
+      "clips": 38,
+      "hours": 0.11
+    },
+    "session_assigned_to_other_split": {
+      "clips": 815,
+      "hours": 2.457
+    },
+    "speaker_assigned_to_other_split": {
+      "clips": 10906,
+      "hours": 32.385
+    },
+    "unknown_speaker": {
+      "clips": 640,
+      "hours": 1.66
+    }
+  },
+  "removed_by_cleaning_rules": {
+    "clips": 0,
+    "note": "no cleaning rule removes clips yet"
+  }
+}
