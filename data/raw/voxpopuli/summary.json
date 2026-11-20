@@ -1,0 +1,237 @@
+{
+  "corpus": "VoxPopuli, Hungarian (hu), transcribed set",
+  "source": {
+    "repository": "facebook/voxpopuli",
+    "revision": "42f01879c780b4a2e90ec0b4f616c2ece526e4f1",
+    "licence": "CC0-1.0",
+    "files": {
+      "hu/train-00000-of-00004.parquet": {
+        "bytes": 2595897654,
+        "sha256": "08e14edd2bdfb5f1c46d06553b9d62f3c105eb66d7f182ea3edadd94298f88cb"
+      },
+      "hu/train-00001-of-00004.parquet": {
+        "bytes": 2593326688,
+        "sha256": "4319b25926833a69d5109a97944faec8d9b41f0539aa5a607bd6789c63e393ef"
+      },
+      "hu/train-00002-of-00004.parquet": {
+        "bytes": 2613856059,
+        "sha256": "828ac5e9ce837737b6a020cddb9d8a3b01224bb8bc2b5ec5e19702c2cbb69675"
+      },
+      "hu/train-00003-of-00004.parquet": {
+        "bytes": 2572374907,
+        "sha256": "35619abd6771ea783346ae2fdac6f5acdcfb8ace5ed2f833bf098e3a1f3fd068"
+      },
+      "hu/validation-00000-of-00001.parquet": {
+        "bytes": 608942228,
+        "sha256": "8088dc7e889a58e88cd25292f188b1934435558768432644acd3e0a9ea9eabeb"
+      },
+      "hu/test-00000-of-00001.parquet": {
+        "bytes": 594503843,
+        "sha256": "cbb60430877088155443c0cf6e3719139bd90d2b0f9854e9e641c5c8d72a9b16"
+      }
+    },
+    "note": "sizes checked by this build; SHA-256 values are the pinned ones checked by huasr.download"
+  },
+  "seed": 0,
+  "target_hours": {
+    "train": 14.0,
+    "validation": 2.5,
+    "test": 2.0
+  },
+  "weights": {
+    "validation": 40,
+    "test": 36
+  },
+  "max_shard_bytes": 95000000,
+  "official_split": {
+    "train": {
+      "clips": 18120,
+      "hours": 54.087,
+      "speakers": 47,
+      "sessions": 1537,
+      "clips_without_speaker_id": 601
+    },
+    "validation": {
+      "clips": 1076,
+      "hours": 3.25,
+      "speakers": 26,
+      "sessions": 141,
+      "clips_without_speaker_id": 16
+    },
+    "test": {
+      "clips": 1110,
+      "hours": 3.106,
+      "speakers": 46,
+      "sessions": 154,
+      "clips_without_speaker_id": 23
+    },
+    "speakers_in_two_splits": {
+      "train-validation": 21,
+      "train-test": 27,
+      "validation-test": 18
+    },
+    "sessions_in_two_splits": {
+      "train-validation": 90,
+      "train-test": 93,
+      "validation-test": 14
+    },
+    "sitting_days_in_two_splits": {
+      "train-validation": 103,
+      "train-test": 120,
+      "validation-test": 40
+    }
+  },
+  "subset": {
+    "train": {
+      "clips": 4597,
+      "hours": 13.998,
+      "speakers": 20,
+      "sessions": 626,
+      "shards": 11,
+      "shard_bytes": 987750400
+    },
+    "validation": {
+      "clips": 826,
+      "hours": 2.499,
+      "speakers": 15,
+      "sessions": 112,
+      "shards": 2,
+      "shard_bytes": 165038080
+    },
+    "test": {
+      "clips": 897,
+      "hours": 2.412,
+      "speakers": 34,
+      "sessions": 104,
+      "shards": 2,
+      "shard_bytes": 166195200
+    },
+    "speakers_in_two_splits": {
+      "train-validation": 0,
+      "train-test": 0,
+      "validation-test": 0
+    },
+    "sessions_in_two_splits": {
+      "train-validation": 0,
+      "train-test": 0,
+      "validation-test": 0
+    },
+    "sitting_days_in_two_splits": {
+      "train-validation": 35,
+      "train-test": 54,
+      "validation-test": 18
+    }
+  },
+  "removed": {
+    "unknown_speaker": {
+      "train": {
+        "clips": 601,
+        "hours": 1.51,
+        "speakers": 0,
+        "sessions": 9
+      },
+      "validation": {
+        "clips": 16,
+        "hours": 0.076,
+        "speakers": 0,
+        "sessions": 1
+      },
+      "test": {
+        "clips": 23,
+        "hours": 0.074,
+        "speakers": 0,
+        "sessions": 4
+      }
+    },
+    "speaker_assigned_to_other_split": {
+      "train": {
+        "clips": 10579,
+        "hours": 31.354,
+        "speakers": 26,
+        "sessions": 1180
+      },
+      "validation": {
+        "clips": 172,
+        "hours": 0.509,
+        "speakers": 11,
+        "sessions": 29
+      },
+      "test": {
+        "clips": 155,
+        "hours": 0.522,
+        "speakers": 12,
+        "sessions": 41
+      }
+    },
+    "session_assigned_to_other_split": {
+      "train": {
+        "clips": 756,
+        "hours": 2.303,
+        "speakers": 10,
+        "sessions": 68
+      },
+      "validation": {
+        "clips": 24,
+        "hours": 0.056,
+        "speakers": 4,
+        "sessions": 3
+      },
+      "test": {
+        "clips": 35,
+        "hours": 0.097,
+        "speakers": 5,
+        "sessions": 7
+      }
+    },
+    "beyond_validation_target": {
+      "train": {
+        "clips": 0,
+        "hours": 0.0,
+        "speakers": 0,
+        "sessions": 0
+      },
+      "validation": {
+        "clips": 38,
+        "hours": 0.11,
+        "speakers": 12,
+        "sessions": 34
+      },
+      "test": {
+        "clips": 0,
+        "hours": 0.0,
+        "speakers": 0,
+        "sessions": 0
+      }
+    },
+    "beyond_train_target": {
+      "train": {
+        "clips": 1587,
+        "hours": 4.921,
+        "speakers": 19,
+        "sessions": 511
+      },
+      "validation": {
+        "clips": 0,
+        "hours": 0.0,
+        "speakers": 0,
+        "sessions": 0
+      },
+      "test": {
+        "clips": 0,
+        "hours": 0.0,
+        "speakers": 0,
+        "sessions": 0
+      }
+    }
+  },
+  "audio": {
+    "source_encodings": {
+      "wav_f32le": 6320
+    },
+    "stored_encodings": {
+      "flac_s16": 6320
+    },
+    "samples_limited_to_16_bit_range": 0,
+    "unreadable_clips": {}
+  }
+}
