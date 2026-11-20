@@ -1,0 +1,21 @@
+# Python caches and local environments
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+.venv/
+
+# Local scratch: downloaded source files (VoxPopuli parquet, FLEURS archive)
+# and audio unpacked from the shards. The raw and clean folders are tracked.
+scratch/
+
+# Common Voice is an external test set. Its dataset page forbids re-hosting,
+# so nothing of it may be committed: not the archive, not the extracted
+# release, not a single clip (Common Voice clips are MP3; our own audio is
+# FLAC), not the list of chosen test clips.
+external/
+cv-corpus-*/
+common-voice-*
+commonvoice_test.*
+*.mp3
