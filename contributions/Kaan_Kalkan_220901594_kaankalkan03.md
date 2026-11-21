@@ -3,18 +3,26 @@
 - Student ID: 220901594
 - GitHub username: `kaankalkan03`
 
-> This file has to be written by Kaan Kalkan personally and committed from the
-> GitHub account above. Nothing below has been written yet.
+ Responsibility area:
 
-## Responsibility area
+Preparation of additional test datasets, FLEURS Hungarian test set integration, dataset documentation, and final submission checklist verification.
 
-_Not written yet: the part of the project this member is responsible for._
 
-## Work done
+- Downloaded the official FLEURS Hungarian test dataset using the project's download module.
+- Prepared the test dataset using the project's subset module.
+- Generated 905 audio clips covering 348 unique sentences with a total duration of 3.07 hours.
+- Verified that there were no unreadable audio clips, missing transcripts, or missing audio files.
+- Added the FLEURS dataset to the repository under the CC BY 4.0 licence.
+- Committed and pushed the generated dataset files to the GitHub repository.
+- Ran the reporting module and confirmed that all automatically generated README blocks were up to date.
 
-_Not written yet: one entry per piece of work, with the date, what was done
-and the files or folders it changed._
+Files added:
 
-## Commits
+- `data/raw/fleurs/manifest.csv`
+- `data/raw/fleurs/summary.json`
+- `data/raw/fleurs/clips/test-000.tar`
+- `data/raw/fleurs/clips/test-001.tar`
 
-_Not written yet: links to this member's own commits in this repository._
+ Commits
+
+- [Build Hungarian FLEURS test dataset](https://github.com/kaankalkan03/NLP-project/commit/5305027)
