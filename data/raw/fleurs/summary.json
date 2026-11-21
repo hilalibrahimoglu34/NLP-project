@@ -1,0 +1,42 @@
+{
+  "corpus": "FLEURS, Hungarian (hu_hu), test split",
+  "source": {
+    "repository": "google/fleurs",
+    "revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+    "licence": "CC BY 4.0",
+    "files": {
+      "data/hu_hu/test.tsv": {
+        "bytes": 561505,
+        "sha256": "939accd545532c3b0eb34891742829314267efd6c67a4a5ac5e15aef23dec82f"
+      },
+      "data/hu_hu/audio/test.tar.gz": {
+        "bytes": 542250479,
+        "sha256": "d2335311350b4c9a6a1811b3ca3faff772a97befe0a7106dbda1edf675b0cb8a"
+      }
+    },
+    "note": "sizes checked by this build; SHA-256 values are the pinned ones checked by huasr.download"
+  },
+  "max_shard_bytes": 95000000,
+  "subset": {
+    "test": {
+      "clips": 905,
+      "hours": 3.07,
+      "sentences": 348,
+      "shards": 2,
+      "shard_bytes": 163573760
+    }
+  },
+  "audio": {
+    "source_encodings": {
+      "wav_f32le": 905
+    },
+    "stored_encodings": {
+      "flac_s16": 905
+    },
+    "samples_limited_to_16_bit_range": 6,
+    "unreadable_clips": {},
+    "audio_without_transcript": 0,
+    "length_differs_from_tsv": 0,
+    "transcripts_without_audio": 0
+  }
+}
