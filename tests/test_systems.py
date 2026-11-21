@@ -45,7 +45,8 @@ class CheckpointTests(unittest.TestCase):
 
 class RegistryTests(unittest.TestCase):
     def test_registered_systems(self):
-        self.assertEqual(sorted(systems.SYSTEMS), ["faster-whisper-base", "faster-whisper-small"])
+        self.assertEqual(sorted(systems.SYSTEMS), ["faster-whisper-base", "faster-whisper-small", "hf-whisper-small",
+                                                   "hf-whisper-small-finetuned"])  # the last two: test_whisper_hf.py
         system = systems.SYSTEMS["faster-whisper-small"]()
         self.assertEqual((system.name, system.group, system.size), ("faster-whisper-small", "baselines", "small"))
         self.assertIn(system.group, systems.GROUPS)
@@ -87,8 +88,9 @@ class FasterWhisperTests(unittest.TestCase):
         lookup.assert_called_once_with("base", local_files_only=True, revision=systems.REVISIONS["base"])
 
     def test_every_registered_size_has_a_pinned_revision(self):
-        for build in systems.SYSTEMS.values():
-            self.assertRegex(systems.REVISIONS[build().size], r"^[0-9a-f]{40}$")
+        for name, build in systems.SYSTEMS.items():
+            if name.startswith("faster-whisper-"):
+                self.assertRegex(systems.REVISIONS[build().size], r"^[0-9a-f]{40}$")
 
     def test_segments_are_joined_and_the_declared_settings_are_passed(self):
         self.system._model = FakeModel()

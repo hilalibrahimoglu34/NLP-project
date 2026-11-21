@@ -1,0 +1,16 @@
+# Packages needed only for Whisper through the Hugging Face implementation: fine-tuning (huasr.finetune)
+# and the systems hf-whisper-small and hf-whisper-small-finetuned (huasr.whisper_hf). Install them on top
+# of requirements.txt:
+#
+#   pip install -r requirements.txt -r requirements-train.txt
+#
+# The versions are those of the Google Colab GPU runtime as published on 20 November 2026 (Python 3.13,
+# torch 2.14.1 built for CUDA 13.0), so on Colab pip keeps what is installed, including the GPU build of
+# torch. The code imports torch and transformers; the trainer of transformers needs accelerate; tokenizers
+# and safetensors read the vocabulary and the weights; huggingface_hub fetches the checkpoint.
+torch==2.14.1
+transformers==5.23.0
+accelerate==1.16.0
+tokenizers==0.23.3
+safetensors==0.8.0
+huggingface_hub==1.33.0

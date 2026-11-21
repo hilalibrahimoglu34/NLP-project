@@ -115,3 +115,14 @@ SYSTEMS = {
     "faster-whisper-base": lambda: FasterWhisper("base"),
     "faster-whisper-small": lambda: FasterWhisper("small"),
 }
+
+
+def _whisper_hf(name: str):
+    """A system of `huasr.whisper_hf`: Whisper small through `transformers`, as published or fine-tuned here."""
+    from . import whisper_hf  # imported when it is asked for: that module imports this one
+
+    return whisper_hf.build(name)
+
+
+SYSTEMS.update({"hf-whisper-small": lambda: _whisper_hf("hf-whisper-small"),
+                "hf-whisper-small-finetuned": lambda: _whisper_hf("hf-whisper-small-finetuned")})
