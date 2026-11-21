@@ -358,10 +358,10 @@ so this system does not sit behind the contract above; see
   lexicon.
 - **Text:** the `reference` column after the scoring policy below, for the
   acoustic model and for the language model.
-- **Decoding:** `mfa transcribe` with its default settings; nothing was
-  tuned. The clips of the split are given to MFA grouped by speaker id,
-  because the model adapts to each speaker; no reference text of the split is
-  written to the folder MFA reads.
+- **Decoding:** `mfa transcribe` with the search settings MFA uses by default
+  (`DECODE_CONFIG`); nothing was tuned. The clips of the split are given to
+  MFA grouped by speaker id, because the model adapts to each speaker; no
+  reference text of the split is written to the folder MFA reads.
 
 What limits it, and what has to be kept in mind when it is compared with the
 other systems:
@@ -371,9 +371,11 @@ other systems:
   is heard, which weighs heavily in a language that builds a new word form
   with every suffix. `collect` counts these words; the share is in
   [`results/README.md`](results/README.md) next to the error rates.
-- **Unknown-word placeholders.** Where MFA decodes its unknown-word model it
-  writes a placeholder such as `<unk>`. Placeholders are removed from the
+- **Unknown-word placeholders.** MFA has an unknown-word model and can write
+  a placeholder such as `<unk>` for it. Any placeholder is removed from the
   hypothesis and counted in `run.json`.
+- **Few training speakers.** The acoustic model has heard only the speakers
+  of the training split, and every speaker it is evaluated on is new to it.
 - **Letters as sound units.** Hungarian spelling is close to the sounds, but
   a letter is not always one sound (*sz*, *cs*, *gy*, *dzs*, long consonants);
   the context-dependent models have to absorb that.
@@ -702,23 +704,26 @@ steps are Python entry points and are the same on Windows, Linux and macOS:
 ```bash
 conda env create -f environment-gmm-hmm.yml      # MFA 3.4.3 and the Kaldi build of the committed run
 conda activate huasr-gmm-hmm
-pip install -e . --no-deps                       # or set the environment variable PYTHONPATH to src
-python -m huasr.gmm_hmm prepare                  # corpus folders, lexicon, settings -> scratch/gmm_hmm/
+# The package must be importable in this environment: set the environment variable PYTHONPATH
+# to src (as the committed run did), or run "pip install -e . --no-deps".
+python -m huasr.gmm_hmm prepare                  # training corpus, lexicon, settings -> scratch/gmm_hmm/
 python -m huasr.gmm_hmm train --jobs 8           # language model, then acoustic model
-python -m huasr.gmm_hmm decode --jobs 8          # the validation split
+python -m huasr.gmm_hmm decode --jobs 8          # the audio of the validation split -> transcripts
 python -m huasr.gmm_hmm collect                  # -> results/baselines/gmm-hmm-mfa/validation/
 python -m huasr.score results/baselines/gmm-hmm-mfa/validation
 python -m huasr.report
 ```
 
-`prepare` reads the shards and the clean manifest of this repository and
-downloads nothing. `--work` puts the work folder (several GB: the corpus as
-MFA reads it, the models, the temporary files of MFA) somewhere else; the
-committed run used a folder outside the repository. `prepare
---train-speakers ID ... --limit N` makes a trial run on a few speakers and the
-first N clips, which is marked as incomplete and kept out of the tables. Like
-`evaluate`, `prepare` refuses `--split test` without `--final-test`. The time
-the committed run took is in the table of
+`prepare` and `decode` read the shards and the clean manifest of this
+repository and download nothing. `--work` puts the work folder (several GB:
+the corpus as MFA reads it, the models, the temporary files of MFA) somewhere
+else; the committed run used a folder outside the repository. `prepare` and
+`train` are run once. `decode` and `collect` take `--split`, so that the same
+trained models can be run on the test split at the end; like `evaluate`,
+`decode` refuses `--split test` without `--final-test`. `prepare
+--train-speakers ID ...` and `decode --limit N` make a trial run on a few
+speakers and the first N clips, which is marked as incomplete and kept out of
+the tables. The time the committed run took is in the table of
 [`results/README.md`](results/README.md).
 
 The committed data was built with exactly these commands and their defaults.

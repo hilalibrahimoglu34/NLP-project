@@ -84,6 +84,7 @@ GMM-HMM recipe trained on our training split (see
 |---|---|---|---|---|---|---|---|---|---|---|
 | faster-whisper-base | `Systran/faster-whisper-base` at `ebe41f70d5b6` | validation | 826 | 54.41 [49.95, 59.16] | 16.52 [13.59, 20.16] | 52.99 | 0.196 | 771 | 52.66 | 15.05 |
 | faster-whisper-small | `Systran/faster-whisper-small` at `536b0662742c` | validation | 826 | 31.55 [28.01, 36.13] | 10.12 [7.64, 13.82] | 30.64 | 0.259 | 771 | 29.40 | 8.48 |
+| gmm-hmm-mfa | trained here on the training split; no published checkpoint | validation | 826 | 86.85 [86.02, 87.68] | 71.97 [70.70, 73.18] | 86.84 | 0.019 | 771 | 86.54 | 71.64 |
 
 Source: `results/baselines/<system>/<split>/scores.json`.
 <!-- end generated -->
@@ -140,15 +141,23 @@ the words of the references that are not in the lexicon (`out_of_vocabulary`)
 and what was done to the output of MFA (`output`).
 
 <!-- generated: results-gmm-hmm -->
-_No complete run yet._
+| Split | Training clips | Words in the lexicon | Reference words not in the lexicon | Clips with such a word | Word errors: substituted / deleted / inserted | Empty hypotheses | Unknown-word placeholders removed | Acoustic training (min) | Decoding (min) |
+|---|---|---|---|---|---|---|---|---|---|
+| validation | 4,597 (14.00 h, 20 speakers) | 20,021 | 2,933 of 18,145 (16.16%) | 754 of 826 | 7,654 / 8,042 / 63 | 2 of 826 | 0 in 0 clips | 73.2 | 2.9 |
 
-Source: `results/baselines/gmm-hmm-mfa/<split>/run.json`.
+Source: `results/baselines/gmm-hmm-mfa/<split>/run.json` and `scores.json`.
 <!-- end generated -->
 
 How to read this table and the row of `gmm-hmm-mfa` in the table above:
 
 - **Reference words not in the lexicon** can never be written by this system,
   so their share is a lower bound for its WER. Whisper has no such bound.
+- **Training clips** names the speakers the acoustic model has heard. Every
+  speaker of the validation split is new to it.
+- **Word errors** shows how the WER is made up. A deletion is a spoken word
+  for which the system wrote nothing: in this run the decoder labelled long
+  stretches of speech as silence where no word sequence of its lexicon and
+  language model fitted the audio.
 - **Empty hypotheses** are clips for which nothing is left after the
   placeholders of MFA (such as `<unk>`) have been removed; every word of their
   reference counts as a deletion.

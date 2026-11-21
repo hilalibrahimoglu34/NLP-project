@@ -1,0 +1,177 @@
+{
+  "system": "gmm-hmm-mfa",
+  "group": "baselines",
+  "checkpoint": {
+    "description": "trained here on the training split; no published checkpoint",
+    "toolkit": "Montreal Forced Aligner 3.4.3 pyhd8ed1ab_1",
+    "kaldi": "5.5.1172 cpu_hf03c2bf_5",
+    "training_data": {
+      "clips": 4597,
+      "speakers": 20,
+      "audio_seconds": 50392.289,
+      "words": 98646,
+      "only_speakers": null
+    },
+    "acoustic_model_sha256": "0a4e0f92b4522e3c50c4d5343d79219cf10196be04b792cffb8aa9d1459a641a",
+    "language_model_sha256": "2f967671219333b53c2e244d63e6f1ba90937aed52563b0ff440dc90e3d0c656"
+  },
+  "settings": {
+    "features": "MFCC without pitch, MFA defaults otherwise",
+    "training_recipe": {
+      "feature_type": "mfcc",
+      "use_pitch": false,
+      "training": [
+        {
+          "monophone": {
+            "subset": 10000,
+            "boost_silence": 1.25
+          }
+        },
+        {
+          "triphone": {
+            "subset": 20000,
+            "boost_silence": 1.25,
+            "num_leaves": 2000,
+            "max_gaussians": 10000
+          }
+        },
+        {
+          "lda": {
+            "subset": 20000,
+            "num_leaves": 2500,
+            "max_gaussians": 15000
+          }
+        },
+        {
+          "sat": {
+            "subset": 20000,
+            "num_leaves": 2500,
+            "max_gaussians": 15000
+          }
+        }
+      ]
+    },
+    "lexicon": {
+      "kind": "graphemic: every word of the training transcripts as its letters, one letter per unit; no pronunciation dictionary, no G2P model",
+      "words": 20021,
+      "units": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "á",
+        "é",
+        "í",
+        "ó",
+        "ö",
+        "ú",
+        "ü",
+        "ő",
+        "ű"
+      ]
+    },
+    "language_model": {
+      "order": 3,
+      "method": "kneser_ney",
+      "tool": "mfa train_lm",
+      "text": "training transcripts only",
+      "vocabulary": "the lexicon"
+    },
+    "text": "column reference after huasr.text.normalize",
+    "decoding": {
+      "command": "mfa transcribe --output_type transcription",
+      "first_beam": 10,
+      "first_max_active": 2000,
+      "beam": 10,
+      "max_active": 2500,
+      "lattice_beam": 6,
+      "acoustic_scale": 0.083333,
+      "other_options": "MFA defaults",
+      "speaker_adaptation": "clips grouped by speaker id; no reference text given to MFA"
+    },
+    "hypothesis": "output of MFA with placeholder tokens such as <unk> removed",
+    "processing_seconds": "wall time of mfa transcribe (features, decoding graph, decoding, rescoring) shared out over the clips by duration; not one clip at a time",
+    "jobs": {
+      "training": 8,
+      "decoding": 8
+    },
+    "fine_tuned": false
+  },
+  "seed": 0,
+  "split": "validation",
+  "final_test": false,
+  "data": {
+    "clean_manifest": "data/clean/voxpopuli/manifest.csv",
+    "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+    "raw_manifest_sha256": "d2400e42d5a226ebba5fcedf0755fc29627dc07bfc264af867aecd1b8e96d187",
+    "reference_column": "reference",
+    "clips_in_split": 826
+  },
+  "clips": 826,
+  "limit": null,
+  "complete": true,
+  "audio_seconds": 8996.458,
+  "processing_seconds": 171.994,
+  "load_seconds": 0.0,
+  "training": {
+    "started_utc": "2026-11-21T09:32:25Z",
+    "finished_utc": "2026-11-21T10:46:26Z",
+    "jobs": 8,
+    "language_model_seconds": 50.3,
+    "acoustic_model_seconds": 4390.5
+  },
+  "out_of_vocabulary": {
+    "reference_words": 18145,
+    "not_in_lexicon": 2933,
+    "rate": 0.1616,
+    "distinct_reference_words": 5880,
+    "distinct_not_in_lexicon": 2439,
+    "clips_with_a_word_not_in_lexicon": 754
+  },
+  "output": {
+    "clips_without_output_file": 0,
+    "clips_with_empty_output": 2,
+    "placeholders_removed": 0,
+    "clips_with_placeholders": 0,
+    "clips_with_placeholders_only": 0,
+    "empty_hypotheses": 2
+  },
+  "hardware": {
+    "processor": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "machine": "AMD64",
+    "logical_cpus": 20,
+    "system": "Windows-11-10.0.26300-SP0"
+  },
+  "packages": {
+    "python": "3.13.18",
+    "kaldi": "5.5.1172 cpu_hf03c2bf_5",
+    "kalpy": "0.10.5 py313hf069bd2_0",
+    "montreal-forced-aligner": "3.4.3 pyhd8ed1ab_1",
+    "ngram": "1.3.17 hc790b64_0",
+    "openfst": "1.8.4 hc790b64_1"
+  },
+  "started_utc": "2026-11-21T11:08:43Z",
+  "finished_utc": "2026-11-21T11:11:35Z"
+}

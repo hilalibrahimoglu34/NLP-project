@@ -1,4 +1,5 @@
-"""Tests for the GMM-HMM baseline: lexicon, corpus folders and the conversion of MFA output (MFA is not run)."""
+"""Tests for the GMM-HMM baseline: lexicon, corpus folders, the steps with a stand-in for MFA, and the
+conversion of MFA output. MFA itself is not run."""
 
 import contextlib
 import csv
@@ -50,6 +51,27 @@ def make_data(root: Path) -> tuple[Path, Path]:
     return raw, clean
 
 
+class FakeMfa:
+    """Stands in for the `mfa` command: writes the files the real one would and remembers every call."""
+
+    def __init__(self, transcript: str = "jó <unk> víz"):
+        self.calls, self.transcript = [], transcript
+
+    def __call__(self, work: Path, name: str, arguments: list) -> float:
+        self.calls.append((name, [str(argument) for argument in arguments]))
+        if name == "train_lm":
+            Path(arguments[1]).write_bytes(b"language model")
+        elif name == "train":
+            Path(arguments[2]).write_bytes(b"acoustic model")
+        else:
+            corpus, output = Path(arguments[0]), Path(arguments[4])
+            for clip in sorted(corpus.rglob("*.flac")):
+                target = output / clip.parent.name / (clip.stem + ".lab")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(self.transcript, encoding="utf-8")
+        return 2.0
+
+
 class TemporaryFolderTestCase(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -89,10 +111,11 @@ class LexiconTests(TemporaryFolderTestCase):
         self.assertEqual(gmm_hmm.out_of_vocabulary(lexicon, [])["rate"], 0.0)
 
 
-class CorpusTests(TemporaryFolderTestCase):
+class StepTests(TemporaryFolderTestCase):
     def setUp(self):
         super().setUp()
         self.raw, self.clean = make_data(self.root)
+        self.work = self.root / "work"
         with (self.clean / "manifest.csv").open(encoding="utf-8", newline="") as handle:
             self.rows = list(csv.DictReader(handle))
 
@@ -104,11 +127,6 @@ class CorpusTests(TemporaryFolderTestCase):
         self.assertEqual(clip.with_suffix(".lab").read_bytes().decode("utf-8"), "jó napot szeged\n")
         self.assertEqual(sorted(path.name for path in (self.root / "corpus").iterdir()), ["11", "12"])
 
-    def test_no_text_is_written_for_the_split_that_is_decoded(self):
-        validation = [row for row in self.rows if row["split"] == "validation"]
-        gmm_hmm.export_corpus(self.raw, validation, self.root / "corpus", with_text=False)
-        self.assertEqual(sorted(path.suffix for path in (self.root / "corpus").rglob("*.*")), [".flac"] * 3)
-
     def test_clip_that_does_not_match_the_manifest_is_an_error(self):
         wrong = [{**self.rows[0], "sha256": "0" * 64}]
         with self.assertRaisesRegex(ValueError, "SHA-256"):
@@ -118,35 +136,80 @@ class CorpusTests(TemporaryFolderTestCase):
             gmm_hmm.export_corpus(self.raw, missing, self.root / "corpus", with_text=True)
 
     def test_prepare_writes_corpus_lexicon_and_settings_from_the_training_split_only(self):
-        work = self.root / "work"
-        state = gmm_hmm.prepare(work, self.raw, self.clean)
+        state = gmm_hmm.prepare(self.work, self.raw, self.clean)
         self.assertEqual(state["training"], {"clips": 3, "speakers": 2, "audio_seconds": 6.0, "words": 10,
                                              "only_speakers": None})     # the clip without text is left out
-        lexicon = gmm_hmm.read_lexicon(work / "lexicon.txt")
+        lexicon = gmm_hmm.read_lexicon(self.work / "lexicon.txt")
         self.assertEqual(list(lexicon), ["a", "az", "jó", "nap", "napot", "szeged", "szép", "víz", "őszi"])
         self.assertNotIn("város", lexicon)                               # a word of the validation split only
-        self.assertEqual(len(list((work / "corpus" / "train").rglob("*.lab"))), 3)
-        self.assertEqual(len(list((work / "corpus" / "validation").rglob("*.flac"))), 3)
-        self.assertEqual(list((work / "corpus" / "validation").rglob("*.lab")), [])
-        self.assertFalse((work / "corpus" / "test").exists())
-        self.assertEqual(json.loads((work / "train_config.json").read_text(encoding="utf-8")), gmm_hmm.TRAIN_CONFIG)
+        self.assertEqual([path.name for path in (self.work / "corpus").iterdir()], ["train"])
+        self.assertEqual(len(list((self.work / "corpus" / "train").rglob("*.lab"))), 3)
+        self.assertEqual(json.loads((self.work / "train_config.json").read_text(encoding="utf-8")),
+                         gmm_hmm.TRAIN_CONFIG)
         self.assertEqual([next(iter(block)) for block in gmm_hmm.TRAIN_CONFIG["training"]],
                          ["monophone", "triphone", "lda", "sat"])
         self.assertIs(gmm_hmm.TRAIN_CONFIG["use_pitch"], False)
         with self.assertRaises(FileExistsError):
-            gmm_hmm.prepare(work, self.raw, self.clean)
+            gmm_hmm.prepare(self.work, self.raw, self.clean)
+        state = gmm_hmm.prepare(self.work, self.raw, self.clean, train_speakers=["11"], force=True)
+        self.assertEqual((state["training"]["clips"], state["training"]["only_speakers"]), (2, ["11"]))
+        self.assertEqual([path.name for path in (self.work / "corpus" / "train").iterdir()], ["11"])
 
-    def test_trial_run_takes_whole_speakers_and_the_first_clips(self):
-        state = gmm_hmm.prepare(self.root / "work", self.raw, self.clean, train_speakers=["11"], limit=2)
-        self.assertEqual((state["training"]["clips"], state["training"]["only_speakers"], state["limit"]), (2, ["11"], 2))
-        self.assertEqual(len(list((self.root / "work" / "corpus" / "validation").rglob("*.flac"))), 2)
+    def test_training_gives_mfa_the_training_corpus_the_lexicon_and_the_settings(self):
+        gmm_hmm.prepare(self.work, self.raw, self.clean)
+        tool = FakeMfa()
+        state = gmm_hmm.train(self.work, jobs=3, run=tool)
+        self.assertEqual([name for name, _ in tool.calls], ["train_lm", "train"])
+        corpus, lexicon = str(self.work / "corpus" / "train"), str(self.work / "lexicon.txt")
+        self.assertEqual(tool.calls[0][1][:4], [corpus, str(self.work / "language_model.zip"), "--dictionary_path",
+                                                lexicon])
+        self.assertEqual(tool.calls[1][1][:5], [corpus, lexicon, str(self.work / "acoustic_model.zip"),
+                                                "--config_path", str(self.work / "train_config.json")])
+        self.assertEqual((state["train"]["jobs"], state["train"]["language_model_seconds"],
+                          state["train"]["acoustic_model_seconds"]), (3, 2.0, 2.0))
 
-    def test_test_split_is_refused_without_the_flag(self):
+    def test_decoding_gives_mfa_the_audio_of_the_split_and_no_text(self):
+        gmm_hmm.prepare(self.work, self.raw, self.clean)
+        tool = FakeMfa()
+        with self.assertRaisesRegex(ValueError, "no trained models"):
+            gmm_hmm.decode(self.work, self.raw, self.clean, run=tool)
+        gmm_hmm.train(self.work, run=tool)
+        state = gmm_hmm.decode(self.work, self.raw, self.clean, jobs=2, run=tool)
+        corpus = self.work / "corpus" / "validation"
+        self.assertEqual(sorted(path.suffix for path in corpus.rglob("*.*")), [".flac"] * 3)
+        self.assertEqual(sorted(path.name for path in corpus.iterdir()), ["21", "22"])      # grouped by speaker
+        name, arguments = tool.calls[-1]
+        self.assertEqual((name, arguments[0], arguments[4]), ("transcribe", str(corpus),
+                                                              str(self.work / "output" / "validation")))
+        self.assertIn("transcription", arguments)
+        self.assertEqual(json.loads((self.work / "decode_config.json").read_text(encoding="utf-8")),
+                         gmm_hmm.DECODE_CONFIG)
+        done = state["decode"]["validation"]
+        self.assertEqual((done["limit"], done["final_test"], done["jobs"], done["seconds"], done["config"]),
+                         (None, False, 2, 2.0, gmm_hmm.DECODE_CONFIG))
+        state = gmm_hmm.decode(self.work, self.raw, self.clean, limit=2, run=tool)          # a trial run
+        self.assertEqual(len(list(corpus.rglob("*.flac"))), 2)
+        self.assertEqual(state["decode"]["validation"]["limit"], 2)
+
+    def test_test_split_is_refused_without_the_flag_and_uses_the_same_models_with_it(self):
+        gmm_hmm.prepare(self.work, self.raw, self.clean)
+        tool = FakeMfa()
+        gmm_hmm.train(self.work, run=tool)
+        gmm_hmm.decode(self.work, self.raw, self.clean, run=tool)
+        calls = len(tool.calls)
         with self.assertRaises(FinalTestRequired):
-            gmm_hmm.prepare(self.root / "work", self.raw, self.clean, split="test")
-        self.assertFalse((self.root / "work").exists())
+            gmm_hmm.decode(self.work, self.raw, self.clean, split="test", run=tool)
         with self.assertRaisesRegex(ValueError, "split to decode"):
-            gmm_hmm.prepare(self.root / "work", self.raw, self.clean, split="train")
+            gmm_hmm.decode(self.work, self.raw, self.clean, split="train", run=tool)
+        self.assertEqual(len(tool.calls), calls)
+        self.assertFalse((self.work / "corpus" / "test").exists())
+        state = gmm_hmm.decode(self.work, self.raw, self.clean, split="test", final_test=True, run=tool)
+        self.assertEqual([name for name, _ in tool.calls[calls:]], ["transcribe"])          # nothing is trained again
+        self.assertEqual(sorted(state["decode"]), ["test", "validation"])
+        self.assertIs(state["decode"]["test"]["final_test"], True)
+        folder = gmm_hmm.collect(self.work, self.clean, self.raw, self.root / "results", split="test")
+        run = json.loads((folder / "run.json").read_text(encoding="utf-8"))
+        self.assertEqual((folder.name, run["split"], run["final_test"], run["clips"]), ("test", "test", True, 1))
 
 
 class OutputTests(TemporaryFolderTestCase):
@@ -161,9 +224,10 @@ class OutputTests(TemporaryFolderTestCase):
         (output / "21").mkdir(parents=True)
         (output / "21" / "v-hu_10-00-00_1.lab").write_text("jó az <unk> víz", encoding="utf-8")
         (output / "21" / "v-hu_10-00-00_2.lab").write_text("<unk> [laugh]\n", encoding="utf-8")
+        self.decoded = {"limit": None, "final_test": False, "jobs": 2, "seconds": 4.0, "config": gmm_hmm.DECODE_CONFIG,
+                        "started_utc": "2026-01-01T00:00:00Z", "finished_utc": "2026-01-01T00:00:04Z"}
         gmm_hmm._state(self.work, train={"jobs": 2, "language_model_seconds": 1.0, "acoustic_model_seconds": 60.0},
-                       decode={"jobs": 2, "seconds": 4.0, "started_utc": "2026-01-01T00:00:00Z",
-                               "finished_utc": "2026-01-01T00:00:04Z", "config": gmm_hmm.DECODE_CONFIG})
+                       decode={"validation": self.decoded})
 
     def test_placeholders_are_removed_and_counted(self):
         self.assertEqual(gmm_hmm.clean_hypothesis("jó az <unk> víz"), ("jó az víz", 1))
@@ -202,12 +266,20 @@ class OutputTests(TemporaryFolderTestCase):
         self.assertEqual(scores["all_clips"]["wer"]["deletions"], 7)
         with self.assertRaises(FileExistsError):
             gmm_hmm.collect(self.work, self.clean, self.raw, self.root / "results")
+        with self.assertRaisesRegex(ValueError, "no output for the split 'test'"):
+            gmm_hmm.collect(self.work, self.clean, self.raw, self.root / "results", split="test")
 
-    def test_trial_run_is_marked_as_incomplete(self):
-        gmm_hmm._state(self.work, limit=2)
-        run = json.loads((gmm_hmm.collect(self.work, self.clean, self.raw, self.root / "results") / "run.json")
+    def test_trial_runs_are_marked_as_incomplete(self):
+        gmm_hmm._state(self.work, decode={"validation": {**self.decoded, "limit": 2}})
+        run = json.loads((gmm_hmm.collect(self.work, self.clean, self.raw, self.root / "few") / "run.json")
                          .read_text(encoding="utf-8"))
         self.assertEqual((run["clips"], run["limit"], run["complete"]), (2, 2, False))
+        state = gmm_hmm._state(self.work)
+        gmm_hmm._state(self.work, decode={"validation": self.decoded},
+                       training={**state["training"], "only_speakers": ["11"]})
+        run = json.loads((gmm_hmm.collect(self.work, self.clean, self.raw, self.root / "speakers") / "run.json")
+                         .read_text(encoding="utf-8"))
+        self.assertEqual((run["clips"], run["complete"]), (3, False))
 
     def test_package_versions_come_from_the_records_of_the_environment(self):
         records = self.root / "prefix" / "conda-meta"
@@ -227,18 +299,21 @@ class OutputTests(TemporaryFolderTestCase):
         self.assertIn("| gmm-hmm-mfa | trained here on the training split; no published checkpoint | validation | 3 |", row)
         lines = report.table_gmm_hmm(self.root).split("\n")
         self.assertEqual(len(lines), 3)
-        self.assertIn("| validation | 3 (0.00 h, 2 speakers) | 9 | 2 of 10 (20.00%) | 2 of 3 | 2 of 3 | 3 in 2 clips |",
-                      lines[2])
+        self.assertIn("| validation | 3 (0.00 h, 2 speakers) | 9 | 2 of 10 (20.00%) | 2 of 3 | 0 / 7 / 0 | 2 of 3 | "
+                      "3 in 2 clips | 1.0 | 0.1 |", lines[2])
+        (folder / "scores.json").unlink()
+        self.assertIn("| not scored yet |", report.table_gmm_hmm(self.root))
 
     def test_command_line_reports_an_error_instead_of_a_traceback(self):
         out, err = io.StringIO(), io.StringIO()
+        folders = ["--work", str(self.work), "--clean", str(self.clean), "--raw", str(self.raw)]
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            self.assertEqual(gmm_hmm.main(["collect", "--work", str(self.work), "--clean", str(self.clean), "--raw",
-                                           str(self.raw), "--results", str(self.root / "results")]), 0)
-            self.assertEqual(gmm_hmm.main(["prepare", "--work", str(self.work), "--clean", str(self.clean), "--raw",
-                                           str(self.raw), "--split", "test"]), 1)
+            self.assertEqual(gmm_hmm.main(["collect", *folders, "--results", str(self.root / "results")]), 0)
+            self.assertEqual(gmm_hmm.main(["decode", *folders, "--split", "test"]), 1)
+            self.assertEqual(gmm_hmm.main(["prepare", *folders]), 1)
         self.assertIn("predictions.csv", out.getvalue())
         self.assertIn("--final-test", err.getvalue())
+        self.assertIn("--force", err.getvalue())
 
 
 if __name__ == "__main__":

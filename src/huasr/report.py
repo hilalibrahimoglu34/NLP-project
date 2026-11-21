@@ -168,27 +168,32 @@ def _checkpoint(checkpoint: dict) -> str:
 
 
 def table_gmm_hmm(root: Path) -> str:
-    """What limits the GMM-HMM baseline, one row per complete run, from its run.json."""
+    """What limits the GMM-HMM baseline, one row per complete run, from its run.json and scores.json."""
     rows = []
     for path in sorted((Path(root) / RESULTS / GMM_HMM).glob("*/run.json")):
         run = json.loads(path.read_text(encoding="utf-8"))
         if not run["complete"]:
             continue
         trained, missing, output = run["checkpoint"]["training_data"], run["out_of_vocabulary"], run["output"]
+        errors = "not scored yet"
+        if path.with_name("scores.json").is_file():
+            wer = json.loads(path.with_name("scores.json").read_text(encoding="utf-8"))["all_clips"]["wer"]
+            errors = f"{wer['substitutions']:,} / {wer['deletions']:,} / {wer['insertions']:,}"
         rows.append((SPLITS.index(run["split"]), [
             run["split"],
             f"{trained['clips']:,} ({trained['audio_seconds'] / 3600:.2f} h, {trained['speakers']} speakers)",
             f"{run['settings']['lexicon']['words']:,}",
             f"{missing['not_in_lexicon']:,} of {missing['reference_words']:,} ({missing['rate'] * 100:.2f}%)",
-            f"{missing['clips_with_a_word_not_in_lexicon']:,} of {run['clips']:,}",
+            f"{missing['clips_with_a_word_not_in_lexicon']:,} of {run['clips']:,}", errors,
             f"{output['empty_hypotheses']:,} of {run['clips']:,}",
             f"{output['placeholders_removed']:,} in {output['clips_with_placeholders']:,} clips",
             f"{run['training']['acoustic_model_seconds'] / 60:.1f}", f"{run['processing_seconds'] / 60:.1f}"]))
     if not rows:
         return "_No complete run yet._"
     return _table(["Split", "Training clips", "Words in the lexicon", "Reference words not in the lexicon",
-                   "Clips with such a word", "Empty hypotheses", "Unknown-word placeholders removed",
-                   "Acoustic training (min)", "Decoding (min)"], [cells for _, cells in sorted(rows)])
+                   "Clips with such a word", "Word errors: substituted / deleted / inserted", "Empty hypotheses",
+                   "Unknown-word placeholders removed", "Acoustic training (min)", "Decoding (min)"],
+                  [cells for _, cells in sorted(rows)])
 
 
 def table_results(root: Path, group: str) -> str:
@@ -255,7 +260,8 @@ def render(text: str, root: Path) -> str:
         if match["name"] == "finetune-plan":
             return f"{match[1]}{block_finetune(root)}\n{match[4]}"
         if match["name"] == "results-gmm-hmm":
-            return f"{match[1]}{table_gmm_hmm(root)}\n\nSource: `{RESULTS}/{GMM_HMM}/<split>/run.json`.\n{match[4]}"
+            source = f"`{RESULTS}/{GMM_HMM}/<split>/run.json` and `scores.json`"
+            return f"{match[1]}{table_gmm_hmm(root)}\n\nSource: {source}.\n{match[4]}"
         if match["name"] in RESULT_BLOCKS:
             group = RESULT_BLOCKS[match["name"]]
             body = table_results(root, group) + f"\n\nSource: `{RESULTS}/{group}/<system>/<split>/scores.json`."
