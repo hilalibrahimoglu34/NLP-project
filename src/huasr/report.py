@@ -33,6 +33,7 @@ CLEAN_SUMMARY = "data/clean/voxpopuli/summary.json"
 RESULTS = "results"
 READMES = ("README.md", "data/raw/README.md", "data/clean/README.md", "results/README.md")
 RESULT_BLOCKS = {"results-baselines": "baselines", "results-own": "own"}  # block name -> folder below results/
+GMM_HMM = "baselines/gmm-hmm-mfa"                                         # the runs of huasr.gmm_hmm, below results/
 BLOCK = re.compile(r"(<!-- generated: (?P<name>[a-z-]+) -->\n)(?P<body>.*?)(<!-- end generated -->)", re.DOTALL)
 
 
@@ -159,6 +160,37 @@ def _percent(part: dict) -> str:
     return f"{part['rate'] * 100:.2f} [{part['ci95'][0] * 100:.2f}, {part['ci95'][1] * 100:.2f}]"
 
 
+def _checkpoint(checkpoint: dict) -> str:
+    """Repository and revision of a published checkpoint; for a system trained here, what its run says."""
+    if "repository" not in checkpoint:
+        return checkpoint.get("description", "")
+    return f"`{checkpoint['repository']}` at `{checkpoint.get('revision', '')[:12]}`"
+
+
+def table_gmm_hmm(root: Path) -> str:
+    """What limits the GMM-HMM baseline, one row per complete run, from its run.json."""
+    rows = []
+    for path in sorted((Path(root) / RESULTS / GMM_HMM).glob("*/run.json")):
+        run = json.loads(path.read_text(encoding="utf-8"))
+        if not run["complete"]:
+            continue
+        trained, missing, output = run["checkpoint"]["training_data"], run["out_of_vocabulary"], run["output"]
+        rows.append((SPLITS.index(run["split"]), [
+            run["split"],
+            f"{trained['clips']:,} ({trained['audio_seconds'] / 3600:.2f} h, {trained['speakers']} speakers)",
+            f"{run['settings']['lexicon']['words']:,}",
+            f"{missing['not_in_lexicon']:,} of {missing['reference_words']:,} ({missing['rate'] * 100:.2f}%)",
+            f"{missing['clips_with_a_word_not_in_lexicon']:,} of {run['clips']:,}",
+            f"{output['empty_hypotheses']:,} of {run['clips']:,}",
+            f"{output['placeholders_removed']:,} in {output['clips_with_placeholders']:,} clips",
+            f"{run['training']['acoustic_model_seconds'] / 60:.1f}", f"{run['processing_seconds'] / 60:.1f}"]))
+    if not rows:
+        return "_No complete run yet._"
+    return _table(["Split", "Training clips", "Words in the lexicon", "Reference words not in the lexicon",
+                   "Clips with such a word", "Empty hypotheses", "Unknown-word placeholders removed",
+                   "Acoustic training (min)", "Decoding (min)"], [cells for _, cells in sorted(rows)])
+
+
 def table_results(root: Path, group: str) -> str:
     """One row per complete run of `group` (a folder below results/), from its scores.json."""
     rows, partial = [], 0
@@ -169,8 +201,7 @@ def table_results(root: Path, group: str) -> str:
             continue
         everything, rest, checkpoint = scores["all_clips"], scores["without_english_number_words"], scores["checkpoint"]
         rows.append((SPLITS.index(scores["split"]), scores["system"], [
-            scores["system"],
-            f"`{checkpoint.get('repository', '')}` at `{checkpoint.get('revision', '')[:12]}`",
+            scores["system"], _checkpoint(checkpoint),
             scores["split"], f"{everything['clips']:,}", _percent(everything["wer"]), _percent(everything["cer"]),
             f"{everything['wer_no_diacritics']['rate'] * 100:.2f}", f"{everything['rtf']:.3f}",
             f"{rest['clips']:,}", f"{rest['wer']['rate'] * 100:.2f}", f"{rest['cer']['rate'] * 100:.2f}"]))
@@ -182,9 +213,49 @@ def table_results(root: Path, group: str) -> str:
                    "their CER %"], [cells for _, _, cells in sorted(rows, key=lambda row: row[:2])]) + note
 
 
+def block_finetune(root: Path) -> str:
+    """Clips and settings of the fine-tuning run, from the clean manifest and the constants of `huasr.finetune`."""
+    from . import finetune  # imported here: the other blocks need nothing but the summary files
+
+    folder = Path(CLEAN_SUMMARY).parent
+    if not (Path(root) / folder / "manifest.csv").is_file():
+        return f"_Not built yet: `{folder.as_posix()}/manifest.csv` does not exist._"
+    plan = finetune.plan(Path(root) / folder)
+    rows = []
+    for split, purpose in (("train", "training"), ("validation", "choosing the checkpoint")):
+        part, left = plan["data"][split], plan["data"][split]["excluded"]
+        rows.append([split, purpose, f"{part['clips_in_split']:,}",
+                     "kept" if left["english_number_words"] is None else f"{left['english_number_words']:,}",
+                     f"{left['longer_than_window']:,} of {part['longer_than_window_in_split']:,}",
+                     f"{left['empty_target']:,}", f"{part['clips']:,}", f"{part['hours']:.2f}", part["speakers"]])
+    values, decoding = plan["hyperparameters"], plan["selection"]["decoding"]
+    clips = values["batch_size"] * values["gradient_accumulation_steps"]
+    passes = values["max_steps"] * clips / max(1, plan["data"]["train"]["clips"])
+    seconds = finetune.WINDOW_MS // 1000
+    return (_table(["Split", "Used for", "Clips in the split", "Left out: English number words in the reference",
+                    f"Left out: longer than {seconds} s, of all such clips", "Left out: empty target", "Clips used",
+                    "Hours used", "Speakers"], rows)
+            + f"\n\nA clip is counted under the first rule that leaves it out; the other training clips longer than "
+              f"{seconds} s are already left out for their number words. Settings: {values['max_steps']:,} updates "
+              f"of {clips} clips (about {passes:.1f} passes over the training clips used), learning rate "
+              f"{values['learning_rate']:g} after a linear warm-up of {values['warmup_steps']} updates, then "
+              f"{values['lr_scheduler']} decay to zero; optimizer `{values['optimizer']}`, weight decay "
+              f"{values['weight_decay']:g}, gradient norm limited to {values['max_grad_norm']:g}; mixed precision "
+              f"`{values['mixed_precision']}`; validation and a checkpoint every {values['evaluate_every_steps']} "
+              f"updates; seed {plan['seed']}. Checkpoints are compared by validation "
+              f"{plan['selection']['metric'].upper()}, decoded with beam size {decoding['num_beams']} and at most "
+              f"{decoding['max_length']} tokens."
+            + f"\n\nSource: `{folder.as_posix()}/manifest.csv` and the constants of `src/huasr/finetune.py` "
+              f"(`python -m huasr.finetune plan`).")
+
+
 def render(text: str, root: Path) -> str:
     """`text` with every generated block rewritten from the source files below `root`."""
     def block(match: re.Match) -> str:
+        if match["name"] == "finetune-plan":
+            return f"{match[1]}{block_finetune(root)}\n{match[4]}"
+        if match["name"] == "results-gmm-hmm":
+            return f"{match[1]}{table_gmm_hmm(root)}\n\nSource: `{RESULTS}/{GMM_HMM}/<split>/run.json`.\n{match[4]}"
         if match["name"] in RESULT_BLOCKS:
             group = RESULT_BLOCKS[match["name"]]
             body = table_results(root, group) + f"\n\nSource: `{RESULTS}/{group}/<system>/<split>/scores.json`."

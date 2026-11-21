@@ -7,14 +7,16 @@ speakers the model has never heard and on read speech from two other corpora.
 
 COE025 Natural Language Processing, Project 3 (automatic speech recognition).
 
-> **Status (18 November 2026).** The data stage is done for VoxPopuli: a
+> **Status (21 November 2026).** The data stage is done for VoxPopuli: a
 > subset whose three splits share no speaker and no recording session is
 > built in `data/raw/voxpopuli/`, and its repaired references are in
 > `data/clean/voxpopuli/`. The evaluation pipeline (runner, scorer, result
-> table) is implemented and tested, and two zero-shot baselines have been run
-> on the **validation** split; their figures are in
+> table) is implemented and tested. Three baselines have been run on the
+> **validation** split: Whisper base and small zero-shot, and an MFCC +
+> GMM-HMM system trained on our training split. Their figures are in
 > [`results/README.md`](results/README.md). The test split has not been
-> touched, FLEURS is not built yet, and no model has been trained. The section
+> touched, FLEURS is not built yet, and the model of the research question
+> has not been fine-tuned yet. The section
 > [Status](#status) lists what exists and what is only planned. Every table
 > of numbers in the READMEs is written by `python -m huasr.report` from files
 > that the builders and the scorer generate; no such number is typed by hand.
@@ -330,6 +332,61 @@ loaded, the SHA-256 of its weight file and all settings are in the `run.json`
 of each run; the figures and what limits them are in
 [`results/README.md`](results/README.md).
 
+### GMM-HMM baseline (`gmm-hmm-mfa`)
+
+The classical recogniser: hidden Markov models whose states are Gaussian
+mixtures over MFCC features, a pronunciation lexicon and an n-gram language
+model. There is no published checkpoint to take, so this baseline is trained
+from scratch on our training split with a standard recipe. It is listed with
+the baselines, not as our model: nothing in it is our own design.
+`src/huasr/gmm_hmm.py` runs it with the
+[Montreal Forced Aligner](https://montreal-forced-aligner.readthedocs.io/)
+(MFA), which drives Kaldi. MFA works on a folder of clips, not on one clip,
+so this system does not sit behind the contract above; see
+[Evaluation protocol](#evaluation-protocol).
+
+- **Features:** MFCC without pitch; everything else as MFA sets it.
+- **Acoustic model:** the first four blocks of MFA's default recipe with
+  their default settings (`TRAIN_CONFIG`): monophone, triphone, LDA, and
+  speaker-adapted training (SAT). The later blocks of that recipe are left
+  out.
+- **Lexicon:** graphemic. Every word of the training transcripts is spelled
+  as its letters, one letter per unit (*szép* is `s z é p`); digraphs are not
+  merged. No pronunciation dictionary and no G2P model is used.
+- **Language model:** trigram with Kneser-Ney smoothing, estimated by
+  `mfa train_lm` from the training transcripts only. Its vocabulary is the
+  lexicon.
+- **Text:** the `reference` column after the scoring policy below, for the
+  acoustic model and for the language model.
+- **Decoding:** `mfa transcribe` with its default settings; nothing was
+  tuned. The clips of the split are given to MFA grouped by speaker id,
+  because the model adapts to each speaker; no reference text of the split is
+  written to the folder MFA reads.
+
+What limits it, and what has to be kept in mind when it is compared with the
+other systems:
+
+- **Closed vocabulary.** It can only write words that occur in the training
+  transcripts. Every other word of a reference is an error before any audio
+  is heard, which weighs heavily in a language that builds a new word form
+  with every suffix. `collect` counts these words; the share is in
+  [`results/README.md`](results/README.md) next to the error rates.
+- **Unknown-word placeholders.** Where MFA decodes its unknown-word model it
+  writes a placeholder such as `<unk>`. Placeholders are removed from the
+  hypothesis and counted in `run.json`.
+- **Letters as sound units.** Hungarian spelling is close to the sounds, but
+  a letter is not always one sound (*sz*, *cs*, *gy*, *dzs*, long consonants);
+  the context-dependent models have to absorb that.
+- **Speaker ids are used.** The Whisper baselines get one clip at a time and
+  nothing else. This system also gets the speaker id of every clip.
+- **Speed is not comparable.** MFA decodes the whole split with several
+  parallel jobs; the processing time in `run.json` is the wall time of
+  `mfa transcribe` shared out over the clips, not a per-clip time.
+- **Platform.** The run in this repository was made on Windows 11 with the
+  win-64 packages of conda-forge, without WSL. The steps are plain Python
+  entry points and the environment file pins the same versions for every
+  platform, but they have not been run on Linux or Colab.
+
 Planned; the list will be extended with every baseline the course lists for
 this project:
 
@@ -344,6 +401,133 @@ this project:
 Decoding settings are chosen on the validation split only. For every
 zero-shot model the report will say whether its published training data
 includes VoxPopuli, FLEURS or Common Voice.
+
+## Fine-tuning Whisper small (our own model)
+
+> **Status (21 November 2026).** The code of this section is written and
+> tested without a model. It has **not been run on a GPU yet**, so it has no
+> results, and its calls into `transformers` have only been exercised through
+> a stand-in in the tests. The lists under [Systems](#systems),
+> [Repository layout](#repository-layout) and [Status](#status) do not name
+> its files yet; they are listed at the end of this section.
+
+Fine-tuning is this project's own contribution. It is reported under "Our own
+models" in [`results/README.md`](results/README.md), apart from the baselines,
+on the same validation clips, references, normalisation and scoring.
+
+**Two systems, one piece of code.** `src/huasr/whisper_hf.py` runs Whisper
+small through the Hugging Face implementation (`transformers`), behind the
+system contract:
+
+| System | Group | What is loaded |
+|---|---|---|
+| `hf-whisper-small` | `baselines` | `openai/whisper-small` at revision `973afd24965f72e36ca33b3055d56a652f456b4d`, as published (zero-shot) |
+| `hf-whisper-small-finetuned` | `own` | that checkpoint after `python -m huasr.finetune train`, read from a local folder |
+
+The zero-shot system is measured first, then the checkpoint is fine-tuned,
+then the kept checkpoint is run on the same clips. Both systems decode in the
+same way: language Hungarian, task transcribe, no timestamps, beam size 5 and
+temperature 0 as for the faster-whisper baselines, 32-bit floats, on the GPU
+if there is one (the run manifest names the device). Whisper reads at most 30
+seconds at once and cannot move on through a longer recording without
+timestamps, so a longer clip is cut into the fewest equal parts that fit and
+the texts are joined. A word at a cut can come out wrong, for both systems at
+the same place. `python -m huasr.compare` compares the two prediction files
+with the paired bootstrap of [Comparing two systems](#comparing-two-systems)
+and refuses runs that do not hold the same clips and references.
+
+**Fixed before the first run** (`src/huasr/finetune.py`). The validation
+split decides one thing only: which checkpoint is kept.
+
+- *Target text:* the column `reference` after the scoring policy, so the
+  model learns to write what the scorer counts.
+- *Training clips with English number words are left out.* Their text is a
+  wrong target (see [Data](#data)). The validation clips keep them, as every
+  system is scored on them, and the scorer gives the figures with and without.
+- *Clips longer than Whisper's window are left out* of the training and of
+  the checkpoint selection: the end of the audio would be cut off while the
+  text went on. The final evaluation covers every validation clip.
+- *Nothing else is changed:* no augmentation, no frozen layers, the
+  tokenizer and the feature extractor of the checkpoint as published. The
+  settings were not tried in several variants.
+
+<!-- generated: finetune-plan -->
+| Split | Used for | Clips in the split | Left out: English number words in the reference | Left out: longer than 30 s, of all such clips | Left out: empty target | Clips used | Hours used | Speakers |
+|---|---|---|---|---|---|---|---|---|
+| train | training | 4,597 | 286 | 18 of 29 | 0 | 4,293 | 12.51 | 20 |
+| validation | choosing the checkpoint | 826 | kept | 7 of 7 | 0 | 819 | 2.42 | 15 |
+
+A clip is counted under the first rule that leaves it out; the other training clips longer than 30 s are already left out for their number words. Settings: 2,000 updates of 16 clips (about 7.5 passes over the training clips used), learning rate 1e-05 after a linear warm-up of 200 updates, then linear decay to zero; optimizer `adamw_torch`, weight decay 0, gradient norm limited to 1; mixed precision `fp16`; validation and a checkpoint every 250 updates; seed 0. Checkpoints are compared by validation WER, decoded with beam size 1 and at most 225 tokens.
+
+Source: `data/clean/voxpopuli/manifest.csv` and the constants of `src/huasr/finetune.py` (`python -m huasr.finetune plan`).
+<!-- end generated -->
+
+The training record `results/own/hf-whisper-small-finetuned/training.json`
+states these counts for the run that was really made, together with the loss
+and the validation scores of every evaluated step, the kept step, the GPU and
+the package versions. The run is seeded, but GPU arithmetic is not repeatable
+bit for bit, so a second run can differ slightly. The fine-tuning code
+refuses the test split. Weights are never stored in this repository: they go
+to `scratch/`, which is not tracked, and the run manifest of the evaluation
+records their SHA-256 and that of the training record.
+
+**How to run it.** On Google Colab with a T4 GPU, open
+[`notebooks/finetune_whisper_small.ipynb`](notebooks/finetune_whisper_small.ipynb)
+and run all cells. It clones this repository, so nothing is uploaded by hand,
+it never uses the test split, and it ends with an archive of the small result
+files. The cells call the commands below, which work on any machine with a
+GPU:
+
+```bash
+pip install -r requirements.txt -r requirements-train.txt
+pip install --no-deps -e .
+python -m huasr.subset unpack --raw data/raw/voxpopuli    # audio files -> scratch/audio/voxpopuli/
+python -m huasr.whisper_hf fetch                          # the pinned checkpoint -> Hugging Face cache
+python -m huasr.finetune plan                             # clips and settings; needs no model
+python -m huasr.finetune train --smoke                    # a few updates on a few clips: checks the whole path
+python -m huasr.evaluate --system hf-whisper-small        # before: zero-shot, validation split
+python -m huasr.finetune train                            # the real run; --resume continues an interrupted one
+python -m huasr.evaluate --system hf-whisper-small-finetuned    # after: the kept checkpoint, same clips
+python -m huasr.score results/baselines/hf-whisper-small/validation results/own/hf-whisper-small-finetuned/validation
+python -m huasr.compare results/own/hf-whisper-small-finetuned/validation results/baselines/hf-whisper-small/validation
+python -m huasr.report
+```
+
+`requirements-train.txt` pins the packages that only this part needs (torch,
+transformers, accelerate, tokenizers, safetensors, huggingface_hub) at the
+versions of the Colab GPU runtime of 20 November 2026, so that Colab keeps
+its GPU build of torch; `requirements.txt` is unchanged. `fetch` is the only
+command that downloads a model, and it checks the weight file against a
+pinned SHA-256. If the clips of an update do not fit in the GPU memory,
+`train --batch-size 8` splits every update into two batches and the record
+says so. The expected time on a T4 is about two hours for the fine-tuning and
+20 to 30 minutes for each evaluation; these are estimates, and the smoke run
+prints a projection measured on the machine.
+
+Files of this part:
+
+```text
+requirements-train.txt     pinned packages for fine-tuning and for the two systems above
+notebooks/
+  finetune_whisper_small.ipynb   Colab: zero-shot baseline, fine-tuning, evaluation, comparison, result files
+src/huasr/
+  whisper_hf.py            Whisper small through transformers, as published and fine-tuned: pinned
+                           checkpoint, fixed decoding, clips longer than the window; `fetch`
+  finetune.py              choice of the clips, target text, dataset, collator, selection metric,
+                           training with Seq2SeqTrainer, best checkpoint, training record
+  compare.py               two runs on the same clips: paired bootstrap over speakers -> comparison file
+  report.py                also writes the table of this section (block `finetune-plan`)
+tests/
+  test_whisper_hf.py       registration, pinned checkpoint, decoding settings, long clips; stand-in model
+  test_finetune.py         target text, clips left out, settings, dataset, collator, metric, best checkpoint
+  test_finetune_run.py     the training command from start to end with a stand-in for transformers
+  fake_transformers.py     that stand-in
+  test_compare.py          the comparison on hand-made prediction files
+  test_notebooks.py        the notebook is well-formed, without output, and never runs the test split
+results/own/hf-whisper-small-finetuned/
+  training.json            the training record (written by the real run)
+  validation/              run.json, predictions.csv, scores.json, comparison_with_hf-whisper-small.json
+```
 
 ## Metrics and why they fit Hungarian
 
@@ -449,6 +633,10 @@ bootstrap resampling for comparing two systems follows Koehn (2004).
 - One runner for every system (`src/huasr/evaluate.py`): it reads the clips
   of a split from the shards, checks them against the manifest, and passes
   the audio to the system. Baselines and our own models get the same clips.
+  The GMM-HMM baseline is the one exception, because MFA decodes a folder at
+  once: `src/huasr/gmm_hmm.py` writes the same clips of the same manifest to
+  a folder, with the same check, and turns the output of MFA into the same
+  two run files. It is scored by the same scorer.
 - Every run leaves a run manifest and a prediction file with clip ids in
   `results/`; scores are computed from the prediction file by a separate
   script. [`results/README.md`](results/README.md) explains the folder and
@@ -508,6 +696,31 @@ fetch it once (`base` or `small`):
 python -c "from faster_whisper import download_model; from huasr.systems import REVISIONS; download_model('small', revision=REVISIONS['small'])"
 ```
 
+GMM-HMM baseline. It needs its own conda environment with MFA and Kaldi; the
+steps are Python entry points and are the same on Windows, Linux and macOS:
+
+```bash
+conda env create -f environment-gmm-hmm.yml      # MFA 3.4.3 and the Kaldi build of the committed run
+conda activate huasr-gmm-hmm
+pip install -e . --no-deps                       # or set the environment variable PYTHONPATH to src
+python -m huasr.gmm_hmm prepare                  # corpus folders, lexicon, settings -> scratch/gmm_hmm/
+python -m huasr.gmm_hmm train --jobs 8           # language model, then acoustic model
+python -m huasr.gmm_hmm decode --jobs 8          # the validation split
+python -m huasr.gmm_hmm collect                  # -> results/baselines/gmm-hmm-mfa/validation/
+python -m huasr.score results/baselines/gmm-hmm-mfa/validation
+python -m huasr.report
+```
+
+`prepare` reads the shards and the clean manifest of this repository and
+downloads nothing. `--work` puts the work folder (several GB: the corpus as
+MFA reads it, the models, the temporary files of MFA) somewhere else; the
+committed run used a folder outside the repository. `prepare
+--train-speakers ID ... --limit N` makes a trial run on a few speakers and the
+first N clips, which is marked as incomplete and kept out of the tables. Like
+`evaluate`, `prepare` refuses `--split test` without `--final-test`. The time
+the committed run took is in the table of
+[`results/README.md`](results/README.md).
+
 The committed data was built with exactly these commands and their defaults.
 `clean`, `search`, `report` and `unpack` need only the files of this
 repository; `subset voxpopuli` needs the downloaded source files and also
@@ -553,6 +766,8 @@ README.md                  this file
 LICENSE                    MIT licence for the code
 requirements.txt           pinned versions of the packages the code imports (the last two only
                            for the Whisper systems)
+environment-gmm-hmm.yml    conda environment of the GMM-HMM baseline: MFA and the Kaldi build of
+                           the committed run
 pyproject.toml             lets "pip install -e ." install the package from src/
 .gitignore                 Python caches, local environment, scratch/, and everything of Common Voice
 .gitattributes             LF line endings for text; tar, FLAC, MP3 and PNG files are binary
@@ -581,8 +796,12 @@ src/huasr/                 the package
   score.py                 prediction file -> scores.json: WER, CER, diacritic-insensitive WER with
                            edit counts and speaker-level intervals, real-time factor, with and
                            without the clips flagged for English number words
+  gmm_hmm.py               GMM-HMM baseline with the Montreal Forced Aligner: corpus folders,
+                           graphemic lexicon, training and decoding with MFA, its output as
+                           run.json and predictions.csv; refuses the test split without --final-test
   report.py                writes the tables of the READMEs from the generated summary and score
-                           files (data tables; result tables for baselines and for our own models)
+                           files (data tables; result tables for baselines and for our own models;
+                           the table of the GMM-HMM baseline)
 tests/                     unit tests (python -m unittest)
   __init__.py              puts src/ on the import path; skips tests whose package is missing
   fixtures.py              generated signals and WAV files used by the tests
@@ -604,6 +823,8 @@ tests/                     unit tests (python -m unittest)
                            manifest, refusal of the test split without the flag
   test_score.py            scorer on hand-made prediction files (rates, edit counts, intervals,
                            real-time factor, flagged clips) and the result tables
+  test_gmm_hmm.py          GMM-HMM baseline without MFA: graphemic lexicon, corpus folders, the
+                           conversion of MFA output into the run files, its tables
 data/raw/                  raw data, explained in data/raw/README.md
   voxpopuli/               clips/*.tar (FLAC audio in shards), manifest.csv, summary.json,
                            selection.csv, split_search.json
@@ -611,13 +832,15 @@ data/clean/                clean data, explained in data/clean/README.md
   voxpopuli/               manifest.csv (with the repaired reference), repair_log.csv,
                            removal_log.csv, summary.json
 results/                   runs and result tables, explained in results/README.md
-  baselines/<system>/<split>/   checkpoints used as published: run.json, predictions.csv, scores.json
+  baselines/<system>/<split>/   baselines (checkpoints used as published; the GMM-HMM system):
+                                run.json, predictions.csv, scores.json
   own/<system>/<split>/         models trained in this project (none yet)
 contributions/             one file per team member, written by that member
 ```
 
-Not tracked (see `.gitignore`): `scratch/` for downloaded source files and
-unpacked audio, `external/` for Common Voice.
+Not tracked (see `.gitignore`): `scratch/` for downloaded source files,
+unpacked audio and the work folder of the GMM-HMM baseline, `external/` for
+Common Voice.
 
 ## Status
 
@@ -638,6 +861,9 @@ Implemented and tested:
   (`src/huasr/systems.py`), runner with the guard on the test split
   (`src/huasr/evaluate.py`), scorer (`src/huasr/score.py`) and result tables
   (`src/huasr/report.py`), tested with a stand-in system and without a model.
+- GMM-HMM baseline (`src/huasr/gmm_hmm.py`): corpus folders, graphemic
+  lexicon, training and decoding with MFA, conversion of its output. The
+  lexicon, the corpus folders and the conversion are tested without MFA.
 
 Done on the real data: all six VoxPopuli files were downloaded with
 `huasr.download` and matched their pinned sizes and SHA-256 values (16
@@ -646,7 +872,9 @@ splits share no speaker and no session (18 November 2026); `unpack` restored
 every clip from the shards with a matching SHA-256; the clean step and the
 report were run. `commonvoice --info` was run against the real service.
 Whisper base and small were run zero-shot on the whole validation split (18
-November 2026) and scored; see [`results/README.md`](results/README.md).
+November 2026) and scored; see [`results/README.md`](results/README.md). The
+GMM-HMM baseline was trained on the whole training split and run on the whole
+validation split with MFA on Windows (21 November 2026).
 
 Not yet run on real files: the FLEURS builder and the Common Voice download
 with a key.

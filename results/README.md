@@ -15,10 +15,11 @@ figures, not the results of the project.
 ```text
 results/
   README.md                      this file
-  baselines/<system>/<split>/    checkpoints used as they were published, without training by us
+  baselines/<system>/<split>/    baselines: checkpoints used as they were published, and the GMM-HMM
+                                 system (gmm-hmm-mfa), trained on our training split with a standard recipe
   own/<system>/<split>/          models trained in this project
-    run.json                     written by huasr.evaluate
-    predictions.csv              written by huasr.evaluate
+    run.json                     written by huasr.evaluate (for gmm-hmm-mfa: by huasr.gmm_hmm)
+    predictions.csv              written by huasr.evaluate (for gmm-hmm-mfa: by huasr.gmm_hmm)
     scores.json                  written by huasr.score from the two files above
 ```
 
@@ -73,7 +74,10 @@ python -m huasr.report                                    # the tables below
 
 ## Baselines
 
-Checkpoints used as published, with no training on our data.
+Whisper base and small are checkpoints used as published, with no training on
+our data. `gmm-hmm-mfa` has no published checkpoint: it is a standard MFCC +
+GMM-HMM recipe trained on our training split (see
+[GMM-HMM baseline](#gmm-hmm-baseline) below).
 
 <!-- generated: results-baselines -->
 | System | Checkpoint and revision | Split | Clips | WER % [95%] | CER % [95%] | WER % without diacritics | RTF | Clips without English number words | their WER % | their CER % |
@@ -123,6 +127,42 @@ table:
   European Parliament cannot be checked by us, so "zero-shot" means only that
   we did not train the model.
 
+### GMM-HMM baseline
+
+`gmm-hmm-mfa` is trained and run by `src/huasr/gmm_hmm.py` with the Montreal
+Forced Aligner (Kaldi): MFCC features without pitch; monophone, triphone, LDA
+and speaker-adapted training; a graphemic lexicon of the training words; a
+trigram language model of the training transcripts; `mfa transcribe` with its
+default settings. The main README describes the system and its limits. Its
+`run.json` has the same fields as the other runs and, in addition, the
+versions and builds of MFA and Kaldi, the training recipe, the training time,
+the words of the references that are not in the lexicon (`out_of_vocabulary`)
+and what was done to the output of MFA (`output`).
+
+<!-- generated: results-gmm-hmm -->
+_No complete run yet._
+
+Source: `results/baselines/gmm-hmm-mfa/<split>/run.json`.
+<!-- end generated -->
+
+How to read this table and the row of `gmm-hmm-mfa` in the table above:
+
+- **Reference words not in the lexicon** can never be written by this system,
+  so their share is a lower bound for its WER. Whisper has no such bound.
+- **Empty hypotheses** are clips for which nothing is left after the
+  placeholders of MFA (such as `<unk>`) have been removed; every word of their
+  reference counts as a deletion.
+- **RTF** is not comparable with the Whisper rows. It is the wall time of
+  `mfa transcribe` for the whole split (features, decoding graph, two decoding
+  passes with speaker adaptation, rescoring) with several parallel jobs,
+  divided by the audio duration. The number of jobs is in `run.json`.
+- The system was given the speaker id of every clip (it adapts to the
+  speaker); the Whisper baselines were not.
+- Decoding used the default settings of MFA. Nothing was tuned on the
+  validation split.
+- The run was made on Windows 11 with the win-64 packages of conda-forge
+  (versions and builds in `run.json`).
+
 ## Our own models
 
 <!-- generated: results-own -->
@@ -130,6 +170,40 @@ _No complete run yet._
 
 Source: `results/own/<system>/<split>/scores.json`.
 <!-- end generated -->
+
+### Whisper small, fine-tuned
+
+Not run yet (21 November 2026). `hf-whisper-small-finetuned` is
+`openai/whisper-small` after `python -m huasr.finetune train`. The main README
+has the clips it is trained on, the settings and the commands
+([Fine-tuning Whisper small](../README.md#fine-tuning-whisper-small-our-own-model)).
+What its run leaves in this folder, and how it is to be read:
+
+- **Before and after.** The checkpoint it starts from is run as the baseline
+  `hf-whisper-small` (in the table of the baselines once it has run) with the
+  same code and the same decoding: Hugging Face implementation, language `hu`,
+  task `transcribe`, no timestamps, beam size 5, temperature 0. The distance
+  between that row and the row of this model is the effect of the
+  fine-tuning. `faster-whisper-small` is the same published checkpoint in
+  another implementation, with quantised weights and on the CPU.
+- **`own/hf-whisper-small-finetuned/training.json`**, next to the split
+  folders: the training record. Clips used and left out, settings, seed, loss
+  and validation scores of every evaluated step, the kept step, SHA-256 of
+  the kept weights, GPU and package versions. The validation scores in it are
+  decoded greedily in batches, without the clips longer than 30 s, and only
+  choose the checkpoint; the figures of the table come from the run folder.
+- **`comparison_with_hf-whisper-small.json`** in the run folder, written by
+  `python -m huasr.compare`: the difference between the two systems on the
+  same clips for WER, CER and the WER without diacritics, each with a 95%
+  interval and a one-sided p-value from the paired bootstrap over speakers.
+- In the table, the column "Checkpoint and revision" names for this model the
+  checkpoint it started from, its revision and the step that was kept;
+  `run.json` has the SHA-256 of the weights that were evaluated.
+- **The validation split chose the checkpoint**, so its figures for this
+  model are development figures, a little better than what an unseen set
+  would give. The test split is the unseen set.
+- **RTF.** The two Hugging Face systems run on the GPU named in their
+  `run.json`; their RTF cannot be compared with the CPU runs.
 
 ## Reference
 
