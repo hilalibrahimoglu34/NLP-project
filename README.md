@@ -15,7 +15,7 @@ COE025 Natural Language Processing, Project 3 (automatic speech recognition).
 > **validation** split: Whisper base and small zero-shot, and an MFCC +
 > GMM-HMM system trained on our training split. Their figures are in
 > [`results/README.md`](results/README.md). The test split has not been
-> touched, FLEURS is not built yet, and the model of the research question
+> touched, FLEURS has been built and committed, and the model of the research question
 > has not been fine-tuned yet. The section
 > [Status](#status) lists what exists and what is only planned. Every table
 > of numbers in the READMEs is written by `python -m huasr.report` from files
@@ -56,7 +56,7 @@ reference.
 | Corpus | Role | Licence | Where it lives |
 |---|---|---|---|
 | [VoxPopuli](https://huggingface.co/datasets/facebook/voxpopuli), Hungarian transcribed set | training, development and main test data | CC0-1.0 | subset in `data/raw/voxpopuli/`, repaired references in `data/clean/voxpopuli/` |
-| [FLEURS](https://huggingface.co/datasets/google/fleurs), `hu_hu`, test split | extra test set: read speech | CC BY 4.0 (attribution below) | whole split in `data/raw/fleurs/` (not built yet) |
+| [FLEURS](https://huggingface.co/datasets/google/fleurs), `hu_hu`, test split | extra test set: read speech | CC BY 4.0 (attribution below) | whole split in `data/raw/fleurs/` (built and committed) |
 | [Common Voice Scripted Speech 27.0](https://mozilladatacollective.com/datasets/cmu5wq4u200dknq072xswzofb), Hungarian, test split | extra test set: read speech, many volunteers | CC0-1.0, re-hosting forbidden | **never in this repository**; fetched into `external/` (ignored by git) |
 
 Every source file is pinned: `src/huasr/download.py` holds the dataset
@@ -876,13 +876,11 @@ November 2026) and scored; see [`results/README.md`](results/README.md). The
 GMM-HMM baseline was trained on the whole training split and run on the whole
 validation split with MFA on Windows (21 November 2026).
 
-Not yet run on real files: the FLEURS builder and the Common Voice download
-with a key.
+The FLEURS builder has been successfully run on real files. The Common Voice download with a key remains pending.
 
 Not done yet:
 
 - Any run on the test split.
-- FLEURS in `data/raw/fleurs/`.
 - A decision on the references with English number words, and cleaning rules
   that remove clips.
 - The other baselines, fine-tuning, the subword tokenizer, the comparison of
