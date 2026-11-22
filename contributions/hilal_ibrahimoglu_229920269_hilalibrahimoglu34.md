@@ -16,6 +16,7 @@ Lexical coverage and out-of-vocabulary (OOV) analysis for Hungarian VoxPopuli AS
 
 - `scripts/oov_analysis.py`
 - `README_oov_analysis.md`
+- `notebooks/oov_analysis.ipynb`
 - `results/oov_analysis.md` is generated when the script is run locally.
 
 ## Commits
