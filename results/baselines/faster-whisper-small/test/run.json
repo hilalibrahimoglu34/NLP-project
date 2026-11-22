@@ -1,0 +1,55 @@
+{
+  "system": "faster-whisper-small",
+  "group": "baselines",
+  "checkpoint": {
+    "repository": "Systran/faster-whisper-small",
+    "revision": "536b0662742c02347bc0e980a01041f333bce120",
+    "converted_from": "openai/whisper-small",
+    "model_bin_bytes": 483546902,
+    "model_bin_sha256": "3e305921506d8872816023e4c273e75d2419fb89b24da97b4fe7bce14170d671"
+  },
+  "settings": {
+    "device": "cpu",
+    "compute_type": "int8",
+    "cpu_threads": 4,
+    "language": "hu",
+    "task": "transcribe",
+    "beam_size": 5,
+    "temperature": 0.0,
+    "condition_on_previous_text": false,
+    "other_options": "faster-whisper defaults",
+    "fine_tuned": false
+  },
+  "seed": 0,
+  "split": "test",
+  "final_test": true,
+  "data": {
+    "clean_manifest": "data/clean/voxpopuli/manifest.csv",
+    "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+    "raw_manifest_sha256": "d2400e42d5a226ebba5fcedf0755fc29627dc07bfc264af867aecd1b8e96d187",
+    "reference_column": "reference",
+    "clips_in_split": 897
+  },
+  "clips": 897,
+  "limit": null,
+  "complete": true,
+  "audio_seconds": 8684.406,
+  "processing_seconds": 2422.672,
+  "load_seconds": 0.989,
+  "hardware": {
+    "processor": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "machine": "AMD64",
+    "logical_cpus": 20,
+    "system": "Windows-11-10.0.26300-SP0"
+  },
+  "packages": {
+    "python": "3.13.5",
+    "numpy": "2.5.4",
+    "av": "19.0.1",
+    "huasr": "run from the source tree",
+    "faster-whisper": "1.2.1",
+    "ctranslate2": "4.8.3"
+  },
+  "started_utc": "2026-11-22T04:41:57Z",
+  "finished_utc": "2026-11-22T05:22:26Z"
+}

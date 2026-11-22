@@ -86,6 +86,10 @@ GMM-HMM recipe trained on our training split (see
 | faster-whisper-small | `Systran/faster-whisper-small` at `536b0662742c` | validation | 826 | 31.55 [28.01, 36.13] | 10.12 [7.64, 13.82] | 30.64 | 0.259 | 771 | 29.40 | 8.48 |
 | gmm-hmm-mfa | trained here on the training split; no published checkpoint | validation | 826 | 86.85 [86.02, 87.68] | 71.97 [70.70, 73.18] | 86.84 | 0.019 | 771 | 86.54 | 71.64 |
 | hf-whisper-small | `openai/whisper-small` at `973afd24965f` | validation | 826 | 33.65 [27.78, 41.32] | 12.04 [7.36, 19.09] | 32.73 | 0.146 | 771 | 31.04 | 9.78 |
+| faster-whisper-base | `Systran/faster-whisper-base` at `ebe41f70d5b6` | test | 897 | 52.05 [50.30, 53.98] | 15.03 [14.00, 16.11] | 50.47 | 0.209 | 862 | 51.66 | 14.58 |
+| faster-whisper-small | `Systran/faster-whisper-small` at `536b0662742c` | test | 897 | 29.43 [27.70, 31.31] | 8.53 [7.52, 9.65] | 28.54 | 0.279 | 862 | 28.91 | 7.99 |
+| gmm-hmm-mfa | trained here on the training split; no published checkpoint | test | 897 | 87.88 [87.10, 88.61] | 71.53 [70.77, 72.20] | 87.85 | 0.021 | 862 | 87.73 | 71.41 |
+| hf-whisper-small | `openai/whisper-small` at `973afd24965f` | test | 897 | 29.60 [27.88, 31.63] | 9.14 [7.68, 11.06] | 28.63 | 0.141 | 862 | 29.11 | 8.70 |
 
 Source: `results/baselines/<system>/<split>/scores.json`.
 <!-- end generated -->
@@ -145,6 +149,7 @@ and what was done to the output of MFA (`output`).
 | Split | Training clips | Words in the lexicon | Reference words not in the lexicon | Clips with such a word | Word errors: substituted / deleted / inserted | Empty hypotheses | Unknown-word placeholders removed | Acoustic training (min) | Decoding (min) |
 |---|---|---|---|---|---|---|---|---|---|
 | validation | 4,597 (14.00 h, 20 speakers) | 20,021 | 2,933 of 18,145 (16.16%) | 754 of 826 | 7,654 / 8,042 / 63 | 2 of 826 | 0 in 0 clips | 73.2 | 2.9 |
+| test | 4,597 (14.00 h, 20 speakers) | 20,021 | 2,836 of 17,406 (16.29%) | 806 of 897 | 7,987 / 7,193 / 116 | 0 of 897 | 0 in 0 clips | 73.2 | 3.1 |
 
 Source: `results/baselines/gmm-hmm-mfa/<split>/run.json` and `scores.json`.
 <!-- end generated -->
@@ -179,6 +184,7 @@ How to read this table and the row of `gmm-hmm-mfa` in the table above:
 | System | Checkpoint and revision | Split | Clips | WER % [95%] | CER % [95%] | WER % without diacritics | RTF | Clips without English number words | their WER % | their CER % |
 |---|---|---|---|---|---|---|---|---|---|---|
 | hf-whisper-small-finetuned | `openai/whisper-small` at `973afd24965f`, fine-tuned on the training split (step 1500 of 2000) | validation | 826 | 22.06 [17.89, 27.28] | 8.35 [5.11, 12.94] | 21.64 | 0.140 | 771 | 19.93 | 6.54 |
+| hf-whisper-small-finetuned | `openai/whisper-small` at `973afd24965f`, fine-tuned on the training split (step 1500 of 2000) | test | 897 | 20.69 [19.00, 22.37] | 6.54 [5.49, 7.71] | 20.29 | 0.140 | 862 | 20.15 | 6.13 |
 
 Source: `results/own/<system>/<split>/scores.json`.
 <!-- end generated -->

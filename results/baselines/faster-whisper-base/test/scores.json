@@ -1,0 +1,125 @@
+{
+  "system": "faster-whisper-base",
+  "group": "baselines",
+  "split": "test",
+  "final_test": true,
+  "complete": true,
+  "checkpoint": {
+    "repository": "Systran/faster-whisper-base",
+    "revision": "ebe41f70d5b6dfa9166e2c581c45c9c0cfc57b66",
+    "converted_from": "openai/whisper-base",
+    "model_bin_bytes": 145217532,
+    "model_bin_sha256": "d01c3014881c9c6f3133c182f3d2887eb6ca1c789a7538c5c007196857a0a6a9"
+  },
+  "settings": {
+    "device": "cpu",
+    "compute_type": "int8",
+    "cpu_threads": 4,
+    "language": "hu",
+    "task": "transcribe",
+    "beam_size": 5,
+    "temperature": 0.0,
+    "condition_on_previous_text": false,
+    "other_options": "faster-whisper defaults",
+    "fine_tuned": false
+  },
+  "hardware": {
+    "processor": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "machine": "AMD64",
+    "logical_cpus": 20,
+    "system": "Windows-11-10.0.26300-SP0"
+  },
+  "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "interval": "95% percentile bootstrap over speakers",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 897,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8684.406,
+    "processing_seconds": 1812.488,
+    "rtf": 0.2087,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.5205,
+      "ci95": [
+        0.503,
+        0.5398
+      ],
+      "substitutions": 6965,
+      "deletions": 952,
+      "insertions": 1143,
+      "reference_units": 17406
+    },
+    "cer": {
+      "rate": 0.1503,
+      "ci95": [
+        0.14,
+        0.1611
+      ],
+      "substitutions": 8341,
+      "deletions": 6835,
+      "insertions": 4231,
+      "reference_units": 129136
+    },
+    "wer_no_diacritics": {
+      "rate": 0.5047,
+      "ci95": [
+        0.4877,
+        0.523
+      ],
+      "substitutions": 6679,
+      "deletions": 957,
+      "insertions": 1148,
+      "reference_units": 17406
+    }
+  },
+  "clips_with_english_number_words": 35,
+  "without_english_number_words": {
+    "clips": 862,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8199.448,
+    "processing_seconds": 1722.891,
+    "rtf": 0.2101,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.5166,
+      "ci95": [
+        0.4986,
+        0.5362
+      ],
+      "substitutions": 6529,
+      "deletions": 840,
+      "insertions": 1100,
+      "reference_units": 16395
+    },
+    "cer": {
+      "rate": 0.1458,
+      "ci95": [
+        0.1347,
+        0.1574
+      ],
+      "substitutions": 7796,
+      "deletions": 5975,
+      "insertions": 3999,
+      "reference_units": 121920
+    },
+    "wer_no_diacritics": {
+      "rate": 0.501,
+      "ci95": [
+        0.4837,
+        0.5197
+      ],
+      "substitutions": 6268,
+      "deletions": 843,
+      "insertions": 1103,
+      "reference_units": 16395
+    }
+  }
+}

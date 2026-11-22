@@ -1,0 +1,139 @@
+{
+  "system": "hf-whisper-small-finetuned",
+  "group": "own",
+  "split": "test",
+  "final_test": true,
+  "complete": true,
+  "checkpoint": {
+    "description": "`openai/whisper-small` at `973afd24965f`, fine-tuned on the training split (step 1500 of 2000)",
+    "base": {
+      "repository": "openai/whisper-small",
+      "revision": "973afd24965f72e36ca33b3055d56a652f456b4d"
+    },
+    "folder": "scratch/finetune/hf-whisper-small/best",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 966995080,
+    "weights_sha256": "3edf22868b32483b66b581328e857dbd96662dbc7bab1159eace28b386a4cd34",
+    "training_record": "training.json",
+    "training_record_sha256": "8e0899b292fdacfdd9867e49252e5205081efda62e23d7c56c08b82355c3afaa",
+    "training_complete": true,
+    "best_step": 1500,
+    "selection_wer": 20.8672
+  },
+  "settings": {
+    "implementation": "transformers WhisperForConditionalGeneration",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "float32",
+    "language": "hu",
+    "task": "transcribe",
+    "return_timestamps": false,
+    "num_beams": 5,
+    "temperature": 0.0,
+    "window_seconds": 30,
+    "longer_audio": "cut into the fewest equal parts of at most one window; texts joined",
+    "other_options": "generation config of the checkpoint",
+    "fine_tuned": true
+  },
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "interval": "95% percentile bootstrap over speakers",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 897,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8684.406,
+    "processing_seconds": 1212.266,
+    "rtf": 0.1396,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.2069,
+      "ci95": [
+        0.19,
+        0.2237
+      ],
+      "substitutions": 2459,
+      "deletions": 582,
+      "insertions": 561,
+      "reference_units": 17406
+    },
+    "cer": {
+      "rate": 0.0654,
+      "ci95": [
+        0.0549,
+        0.0771
+      ],
+      "substitutions": 2565,
+      "deletions": 3066,
+      "insertions": 2813,
+      "reference_units": 129136
+    },
+    "wer_no_diacritics": {
+      "rate": 0.2029,
+      "ci95": [
+        0.1862,
+        0.2194
+      ],
+      "substitutions": 2387,
+      "deletions": 583,
+      "insertions": 562,
+      "reference_units": 17406
+    }
+  },
+  "clips_with_english_number_words": 35,
+  "without_english_number_words": {
+    "clips": 862,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8199.448,
+    "processing_seconds": 1150.716,
+    "rtf": 0.1403,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.2015,
+      "ci95": [
+        0.1836,
+        0.219
+      ],
+      "substitutions": 2276,
+      "deletions": 481,
+      "insertions": 547,
+      "reference_units": 16395
+    },
+    "cer": {
+      "rate": 0.0613,
+      "ci95": [
+        0.0503,
+        0.0736
+      ],
+      "substitutions": 2243,
+      "deletions": 2527,
+      "insertions": 2702,
+      "reference_units": 121920
+    },
+    "wer_no_diacritics": {
+      "rate": 0.1977,
+      "ci95": [
+        0.18,
+        0.2151
+      ],
+      "substitutions": 2214,
+      "deletions": 481,
+      "insertions": 547,
+      "reference_units": 16395
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "system": "hf-whisper-small",
+  "group": "baselines",
+  "split": "test",
+  "final_test": true,
+  "complete": true,
+  "checkpoint": {
+    "repository": "openai/whisper-small",
+    "revision": "973afd24965f72e36ca33b3055d56a652f456b4d",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 966995080,
+    "weights_sha256": "1d7734884874f1a1513ed9aa760a4f8e97aaa02fd6d93a3a85d27b2ae9ca596b"
+  },
+  "settings": {
+    "implementation": "transformers WhisperForConditionalGeneration",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "float32",
+    "language": "hu",
+    "task": "transcribe",
+    "return_timestamps": false,
+    "num_beams": 5,
+    "temperature": 0.0,
+    "window_seconds": 30,
+    "longer_audio": "cut into the fewest equal parts of at most one window; texts joined",
+    "other_options": "generation config of the checkpoint",
+    "fine_tuned": false
+  },
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "interval": "95% percentile bootstrap over speakers",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 897,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8684.406,
+    "processing_seconds": 1222.653,
+    "rtf": 0.1408,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.296,
+      "ci95": [
+        0.2788,
+        0.3163
+      ],
+      "substitutions": 3653,
+      "deletions": 820,
+      "insertions": 680,
+      "reference_units": 17406
+    },
+    "cer": {
+      "rate": 0.0914,
+      "ci95": [
+        0.0768,
+        0.1106
+      ],
+      "substitutions": 3361,
+      "deletions": 5208,
+      "insertions": 3234,
+      "reference_units": 129136
+    },
+    "wer_no_diacritics": {
+      "rate": 0.2863,
+      "ci95": [
+        0.2695,
+        0.3061
+      ],
+      "substitutions": 3481,
+      "deletions": 821,
+      "insertions": 681,
+      "reference_units": 17406
+    }
+  },
+  "clips_with_english_number_words": 35,
+  "without_english_number_words": {
+    "clips": 862,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8199.448,
+    "processing_seconds": 1161.075,
+    "rtf": 0.1416,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.2911,
+      "ci95": [
+        0.273,
+        0.3123
+      ],
+      "substitutions": 3414,
+      "deletions": 702,
+      "insertions": 657,
+      "reference_units": 16395
+    },
+    "cer": {
+      "rate": 0.087,
+      "ci95": [
+        0.0719,
+        0.1072
+      ],
+      "substitutions": 3098,
+      "deletions": 4428,
+      "insertions": 3079,
+      "reference_units": 121920
+    },
+    "wer_no_diacritics": {
+      "rate": 0.2814,
+      "ci95": [
+        0.2637,
+        0.3023
+      ],
+      "substitutions": 3253,
+      "deletions": 703,
+      "insertions": 658,
+      "reference_units": 16395
+    }
+  }
+}

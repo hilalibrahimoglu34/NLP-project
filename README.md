@@ -14,9 +14,10 @@ COE025 Natural Language Processing, Project 3 (automatic speech recognition).
 > table) is implemented and tested. Three baselines have been run on the
 > **validation** split: Whisper base and small zero-shot, and an MFCC +
 > GMM-HMM system trained on our training split. Their figures are in
-> [`results/README.md`](results/README.md). The test split has not been
-> touched, FLEURS has been built and committed, and the model of the research question
-> has been fine-tuned and scored on the validation split. The section
+> [`results/README.md`](results/README.md). The test split was scored
+> once, on 22 November 2026, after every setting was frozen: for the three Whisper
+> baselines, the GMM-HMM baseline and our fine-tuned model. FLEURS has been built and
+> committed but no system has been scored on it. The section
 > [Status](#status) lists what exists and what is only planned. Every table
 > of numbers in the READMEs is written by `python -m huasr.report` from files
 > that the builders and the scorer generate; no such number is typed by hand.
