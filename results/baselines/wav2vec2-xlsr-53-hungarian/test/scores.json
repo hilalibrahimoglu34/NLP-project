@@ -1,0 +1,128 @@
+{
+  "system": "wav2vec2-xlsr-53-hungarian",
+  "group": "baselines",
+  "split": "test",
+  "final_test": true,
+  "complete": true,
+  "checkpoint": {
+    "repository": "jonatasgrosman/wav2vec2-large-xlsr-53-hungarian",
+    "revision": "2bd0786e71cad097c4e6ce9b3e45b40c74ad8f37",
+    "weights_file": "pytorch_model.bin",
+    "weights_bytes": 1262101911,
+    "weights_sha256": "9ab6510ff7c1c59ff751c63047eba527956df889284321f87a73cbf322012932"
+  },
+  "settings": {
+    "implementation": "transformers Wav2Vec2ForCTC",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "float32",
+    "language": "hu (the checkpoint is Hungarian only and takes no language setting)",
+    "decoding": "greedy CTC: best token per frame, repeats merged, blank removed",
+    "language_model": null,
+    "window_seconds": null,
+    "longer_audio": "the whole clip is given to the model at once",
+    "text": "decoded tokens without special tokens; no other change",
+    "fine_tuned": false
+  },
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "interval": "95% percentile bootstrap over speakers",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 897,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8684.406,
+    "processing_seconds": 54.108,
+    "rtf": 0.0062,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.4687,
+      "ci95": [
+        0.4422,
+        0.495
+      ],
+      "substitutions": 6206,
+      "deletions": 923,
+      "insertions": 1030,
+      "reference_units": 17406
+    },
+    "cer": {
+      "rate": 0.117,
+      "ci95": [
+        0.1061,
+        0.1285
+      ],
+      "substitutions": 5696,
+      "deletions": 5212,
+      "insertions": 4203,
+      "reference_units": 129136
+    },
+    "wer_no_diacritics": {
+      "rate": 0.4516,
+      "ci95": [
+        0.4248,
+        0.4782
+      ],
+      "substitutions": 5905,
+      "deletions": 924,
+      "insertions": 1031,
+      "reference_units": 17406
+    }
+  },
+  "clips_with_english_number_words": 35,
+  "without_english_number_words": {
+    "clips": 862,
+    "clips_with_empty_reference": 0,
+    "speakers": 34,
+    "audio_seconds": 8199.448,
+    "processing_seconds": 51.132,
+    "rtf": 0.0062,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.4642,
+      "ci95": [
+        0.4371,
+        0.4909
+      ],
+      "substitutions": 5816,
+      "deletions": 803,
+      "insertions": 991,
+      "reference_units": 16395
+    },
+    "cer": {
+      "rate": 0.1129,
+      "ci95": [
+        0.1022,
+        0.1243
+      ],
+      "substitutions": 5142,
+      "deletions": 4656,
+      "insertions": 3972,
+      "reference_units": 121920
+    },
+    "wer_no_diacritics": {
+      "rate": 0.4469,
+      "ci95": [
+        0.4196,
+        0.474
+      ],
+      "substitutions": 5531,
+      "deletions": 804,
+      "insertions": 992,
+      "reference_units": 16395
+    }
+  }
+}
