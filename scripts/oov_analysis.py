@@ -10,7 +10,7 @@ from huasr.metrics import wer, cer
 MANIFEST = ROOT / "data/clean/voxpopuli/manifest.csv"
 PREDICTIONS = sorted((ROOT / "results/baselines").glob("*/test/predictions.csv")) + sorted((ROOT / "results/own").glob("*/test/predictions.csv"))
 OUT = ROOT / "results/oov_analysis.md"
-TOKEN_RE = re.compile(r"^\\w+$", re.UNICODE)
+TOKEN_RE = re.compile(r"^\w+$", re.UNICODE)
 def read_csv(path):
     with path.open(encoding="utf-8-sig", newline="") as f: return list(csv.DictReader(f))
 def pct(n, d): return f"{100*n/d:.2f}%" if d else "n/a"
@@ -70,6 +70,6 @@ def main():
       "## Reproduction", "", "`python scripts/oov_analysis.py`", "",
       f"Prediction files included: **{n_systems}**. All metrics are generated from committed input files, not hard-coded.", ""]
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text("\\n".join(lines), encoding="utf-8")
+    OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {OUT.relative_to(ROOT)}")
 if __name__ == "__main__": main()
