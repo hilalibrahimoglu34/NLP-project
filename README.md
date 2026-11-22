@@ -535,6 +535,170 @@ results/own/hf-whisper-small-finetuned/
   validation/              run.json, predictions.csv, scores.json, comparison_with_hf-whisper-small.json
 ```
 
+## Pretrained baselines of other model families
+
+> **Status (22 November 2026).** The four systems of this section are
+> implemented and tested without a model. **None of them has been run yet**,
+> so they have no results. Their calls into `transformers` were written from
+> the model cards and the source of the pinned release and have only been
+> exercised through stand-ins in the tests.
+
+The course lists these pretrained models as baselines. Each one is a
+published checkpoint that is run the way its publisher describes it. Nothing
+is trained and no setting is chosen by us, so every one of them is a
+baseline and never our own model. `src/huasr/pretrained.py` puts them behind
+the system contract; they get the same clips, references, normalisation and
+scoring as every other system.
+
+| System | Family | Checkpoint and revision | Licence | Language setting |
+|---|---|---|---|---|
+| `wav2vec2-xlsr-53-hungarian` | self-supervised encoder with a CTC head | `jonatasgrosman/wav2vec2-large-xlsr-53-hungarian` at `2bd0786e71cad097c4e6ce9b3e45b40c74ad8f37` | Apache-2.0 | none to set: the checkpoint is Hungarian only |
+| `canary-1b-v2` | attention encoder-decoder | `nvidia/canary-1b-v2` at `d455706339a6b32e1aa40f82c713a482a0c938e2` | CC BY 4.0 | source `hu` and target `hu`: transcription, not translation |
+| `parakeet-tdt-0.6b-v3` | transducer (TDT) | `nvidia/parakeet-tdt-0.6b-v3` at `541d1f99c6b0c3cd0b11a95167540bb8edefd82b` | CC BY 4.0 | none exists: the model detects the language itself |
+| `qwen3-asr-1.7b` | audio encoder with a language model as decoder | `Qwen/Qwen3-ASR-1.7B-hf` at `bcd2b5b7f32b480ab5790554cfa8347f246a14f3` | Apache-2.0 | Hungarian, forced |
+
+Model cards:
+[wav2vec 2.0](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-hungarian),
+[Canary](https://huggingface.co/nvidia/canary-1b-v2),
+[Parakeet](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3),
+[Qwen3-ASR](https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf). All three
+multilingual cards list Hungarian among the supported languages.
+
+**How they are run.** `transformers` 5.23.0 implements all four model
+families, and the cards of the checkpoints show this way of running them. All
+four therefore use one set of pinned packages, `requirements-pretrained.txt`,
+with the versions of the fine-tuning runs; nothing conflicts. The cards of
+Canary and Parakeet name the NVIDIA toolkit `nemo_toolkit` first, and the
+card of `Qwen/Qwen3-ASR-1.7B` names the package `qwen-asr`. Neither is used:
+`qwen-asr` 0.0.6 pins `transformers` 4.57.6, and `nemo_toolkit` 3.0.0 brings
+its own pinned training stack. For Qwen3-ASR this decides the repository:
+`Qwen/Qwen3-ASR-1.7B-hf` is the copy of `Qwen/Qwen3-ASR-1.7B` that Qwen
+publishes in the Transformers format, and the original repository can only
+be loaded with `qwen-asr`. The 1.7B model needs about 4 GB of GPU memory in
+bfloat16, so the smaller 0.6B model is not needed.
+
+- **wav2vec 2.0 + CTC.** Its card: `facebook/wav2vec2-large-xlsr-53`
+  fine-tuned for Hungarian on the train and validation splits of Common
+  Voice 6.1 and on CSS10, for input at 16 kHz. It is decoded as in the
+  script of the card: the best token of every frame, repeats merged, blank
+  removed, and no language model. The model writes upper-case letters
+  without punctuation; case is left to the scoring policy.
+- **Canary.** The task is given by the decoder prompt: a source and a target
+  language, and equal languages mean transcription. Both are set to `hu`,
+  and before every clip the code checks that the prompt holds the Hungarian
+  token twice and no other language token. Decoding is greedy, as the
+  checkpoint sets it, with punctuation as the processor requests it by
+  default.
+- **Parakeet TDT.** Greedy transducer decoding, as the checkpoint sets it.
+  Its card says that the model detects the language of the audio by itself
+  and needs no prompt. There is no language setting that could be wrong or
+  missing; the run manifest records this.
+- **Qwen3-ASR.** Hungarian is forced with the beginning of the answer that
+  the model was trained with, `language Hungarian<asr_text>`, and before
+  every clip the code checks that the prompt ends with it. Decoding is
+  greedy with at most 1,024 new tokens; the checkpoint sets 512 and its card
+  says to raise the limit for long audio. No context or hotwords are given.
+
+**Clips longer than a model reads at once.** Canary is used on at most 40
+seconds: its card says that beyond 40 seconds its own toolkit cuts the audio
+into chunks. A longer clip is cut into the fewest equal parts that fit and
+the texts are joined, as for Whisper; a word at a cut can come out wrong. The
+other three are given every clip whole: wav2vec 2.0 has no window, Parakeet
+reads up to 24 minutes with full attention and Qwen3-ASR handles long audio
+(their cards), and our longest clip is under a minute.
+
+**Text.** The hypothesis is the decoded token sequence without special
+tokens. Nothing else is done to it for any system: no language model on top
+of the CTC output, and not the clean-up of repeated characters and patterns
+that the Qwen3-ASR processor offers. Case and punctuation are handled by the
+scoring policy, which is the same for every system.
+
+**What these models have already seen.** This has to be kept in mind when
+their rows are read next to Whisper and our fine-tuned model:
+
+- Canary and Parakeet: their cards name the Granary corpus and "NeMo ASR Set
+  3.0" as training data. [Granary](https://huggingface.co/datasets/nvidia/Granary)
+  has a Hungarian VoxPopuli part: European Parliament recordings with
+  machine transcripts. NeMo ASR Set 3.0 includes Europarl-ASR and Common
+  Voice 7.0, and for Canary also FLEURS. These two are therefore not models
+  that meet our kind of audio for the first time, and recordings our clips
+  were cut from may be among their training audio.
+- wav2vec 2.0: Common Voice 6.1 (train and validation) and CSS10, by its
+  card. This matters if it is scored on a Common Voice test set.
+- Qwen3-ASR: its card does not list the training data.
+
+**The test split.** These four systems are run on the validation split and
+once on the test split by the same notebook, which is the one exception to
+the rule that notebooks never touch the test split. They are published
+checkpoints with nothing chosen by us on any data, so a look at the test
+split has nothing to tune, and the test evaluation of the other systems had
+already taken place (22 November 2026). The runner still demands
+`--final-test` and refuses to replace an existing test run.
+
+**HuBERT + CTC is not run: no checkpoint for Hungarian was found.** The
+course also lists a HuBERT encoder with a CTC head, fine-tuned for the
+language. On 22 November 2026 the Hugging Face Hub had no such checkpoint for
+Hungarian:
+
+- [speech recognition models tagged Hungarian with "hubert" in the name](https://huggingface.co/models?pipeline_tag=automatic-speech-recognition&language=hu&search=hubert):
+  no result;
+- the models tagged both `hubert` and `hu`
+  (<https://huggingface.co/api/models?filter=hubert&filter=hu>): 15 models,
+  none of them a speech recogniser. They are Hungarian text models whose
+  name contains "huBERT", and pretrained speech encoders without a CTC head
+  such as [`utter-project/mHuBERT-147`](https://huggingface.co/utter-project/mHuBERT-147)
+  and [`coml/hubert-base-vp20`](https://huggingface.co/coml/hubert-base-vp20).
+
+A bare encoder cannot write text and is not a baseline result. The HuBERT
+checkpoints with a CTC head that its authors published, for example
+[`facebook/hubert-large-ls960-ft`](https://huggingface.co/facebook/hubert-large-ls960-ft),
+are fine-tuned on English LibriSpeech; running one on Hungarian would be
+running a model in the wrong language, so it is not done. The wav2vec 2.0
+checkpoint above is the baseline of this family for Hungarian.
+
+**How to run them.** On Google Colab with a GPU (the other runs used an
+NVIDIA L4), open
+[`notebooks/baselines_pretrained.ipynb`](notebooks/baselines_pretrained.ipynb),
+run its setup section and then only the section of one system. The section
+installs the packages, fetches the checkpoint, runs and scores the validation
+split, runs and scores the test split once, and ends with an archive of that
+system's result folders. The cells call these commands, shown for one system:
+
+```bash
+pip install -r requirements.txt -r requirements-pretrained.txt
+pip install --no-deps -e .
+python -m huasr.pretrained list                           # the four systems: checkpoint, revision, settings
+python -m huasr.pretrained fetch canary-1b-v2             # the pinned checkpoint -> Hugging Face cache
+python -m huasr.evaluate --system canary-1b-v2            # validation split
+python -m huasr.evaluate --system canary-1b-v2 --split test --final-test    # test split, once
+python -m huasr.score results/baselines/canary-1b-v2/validation results/baselines/canary-1b-v2/test
+python -m huasr.report                                    # their rows in results/README.md
+```
+
+`fetch` is the only command that downloads a model; it takes the files that
+are needed, not the other formats of the weights in the same repository, and
+checks the weight file against a pinned size and SHA-256. A model whose
+weights are not all found in the checkpoint is refused, so that no layer can
+run with random values. What is committed after a run: the folders
+`results/baselines/<system>/validation/` and `results/baselines/<system>/test/`
+with `run.json`, `predictions.csv` and `scores.json`, and `results/README.md`
+after `python -m huasr.report`.
+
+Files of this part:
+
+```text
+requirements-pretrained.txt     pinned packages of the four systems (the versions of requirements-train.txt)
+notebooks/
+  baselines_pretrained.ipynb    Colab: shared setup, then one self-contained section per system
+src/huasr/
+  pretrained.py                 the four systems: pinned checkpoints, language settings, decoding, long clips; `fetch`
+tests/
+  test_pretrained.py            registration, pinned checkpoints, language checks, decoding calls, weights that
+                                are missing, the runner and the scorer; stand-ins for processors and models
+  test_notebooks.py             also: this notebook is the documented exception that runs the test split, once
+                                per system, and every section is complete in itself
+```
+
 ## Metrics and why they fit Hungarian
 
 All error rates come from one edit-distance alignment between reference and

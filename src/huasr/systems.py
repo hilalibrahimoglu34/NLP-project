@@ -126,3 +126,16 @@ def _whisper_hf(name: str):
 
 SYSTEMS.update({"hf-whisper-small": lambda: _whisper_hf("hf-whisper-small"),
                 "hf-whisper-small-finetuned": lambda: _whisper_hf("hf-whisper-small-finetuned")})
+
+
+def _pretrained(name: str):
+    """A system of `huasr.pretrained`: a published checkpoint of another model family, run as a baseline."""
+    from . import pretrained  # imported when it is asked for: that module imports this one
+
+    return pretrained.build(name)
+
+
+SYSTEMS.update({"wav2vec2-xlsr-53-hungarian": lambda: _pretrained("wav2vec2-xlsr-53-hungarian"),
+                "canary-1b-v2": lambda: _pretrained("canary-1b-v2"),
+                "parakeet-tdt-0.6b-v3": lambda: _pretrained("parakeet-tdt-0.6b-v3"),
+                "qwen3-asr-1.7b": lambda: _pretrained("qwen3-asr-1.7b")})

@@ -1,0 +1,18 @@
+# Packages for the pretrained baselines of huasr.pretrained: wav2vec2-xlsr-53-hungarian, canary-1b-v2,
+# parakeet-tdt-0.6b-v3 and qwen3-asr-1.7b. Install them on top of requirements.txt:
+#
+#   pip install -r requirements.txt -r requirements-pretrained.txt
+#
+# transformers 5.23.0 implements all four model families, so the four systems need the same packages
+# and none of them conflicts with another or with requirements-train.txt, whose versions these are
+# (the Google Colab GPU runtime of 20 November 2026; the runs of 22 November 2026 used them). torch
+# runs the models, tokenizers and safetensors read the vocabularies and the weights, huggingface_hub
+# fetches the checkpoints.
+#
+# Not used, and not to be installed next to these: nemo_toolkit (3.0.0 pins lightning<=2.4.0 and
+# many more) and qwen-asr (0.0.6 pins transformers==4.57.6 and accelerate==1.12.0).
+torch==2.14.1
+transformers==5.23.0
+tokenizers==0.23.3
+safetensors==0.8.0
+huggingface_hub==1.33.0

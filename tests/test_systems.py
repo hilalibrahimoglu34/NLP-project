@@ -45,8 +45,10 @@ class CheckpointTests(unittest.TestCase):
 
 class RegistryTests(unittest.TestCase):
     def test_registered_systems(self):
-        self.assertEqual(sorted(systems.SYSTEMS), ["faster-whisper-base", "faster-whisper-small", "hf-whisper-small",
-                                                   "hf-whisper-small-finetuned"])  # the last two: test_whisper_hf.py
+        self.assertEqual(sorted(systems.SYSTEMS), [
+            "canary-1b-v2", "faster-whisper-base", "faster-whisper-small",
+            "hf-whisper-small", "hf-whisper-small-finetuned",        # these two: test_whisper_hf.py
+            "parakeet-tdt-0.6b-v3", "qwen3-asr-1.7b", "wav2vec2-xlsr-53-hungarian"])  # the others: test_pretrained.py
         system = systems.SYSTEMS["faster-whisper-small"]()
         self.assertEqual((system.name, system.group, system.size), ("faster-whisper-small", "baselines", "small"))
         self.assertIn(system.group, systems.GROUPS)
