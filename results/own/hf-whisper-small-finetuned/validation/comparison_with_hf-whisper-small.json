@@ -1,0 +1,93 @@
+{
+  "new": {
+    "system": "hf-whisper-small-finetuned",
+    "group": "own",
+    "folder": "results/own/hf-whisper-small-finetuned/validation"
+  },
+  "baseline": {
+    "system": "hf-whisper-small",
+    "group": "baselines",
+    "folder": "results/baselines/hf-whisper-small/validation"
+  },
+  "split": "validation",
+  "final_test": false,
+  "complete": true,
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "difference": "rate(new) - rate(baseline); negative means fewer errors of the new system",
+    "interval": "95% percentile interval of the difference, paired bootstrap over speakers",
+    "p_value": "one-sided, H0: the new system is not better than the baseline",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 826,
+    "speakers": 15,
+    "wer": {
+      "new": 0.2206,
+      "baseline": 0.3365,
+      "difference": -0.1158,
+      "ci95": [
+        -0.156,
+        -0.0764
+      ],
+      "p_value": 0.0001
+    },
+    "cer": {
+      "new": 0.0835,
+      "baseline": 0.1204,
+      "difference": -0.0369,
+      "ci95": [
+        -0.0722,
+        -0.0058
+      ],
+      "p_value": 0.0063
+    },
+    "wer_no_diacritics": {
+      "new": 0.2164,
+      "baseline": 0.3273,
+      "difference": -0.1109,
+      "ci95": [
+        -0.1521,
+        -0.0706
+      ],
+      "p_value": 0.0001
+    }
+  },
+  "clips_with_english_number_words": 55,
+  "without_english_number_words": {
+    "clips": 771,
+    "speakers": 15,
+    "wer": {
+      "new": 0.1993,
+      "baseline": 0.3104,
+      "difference": -0.1111,
+      "ci95": [
+        -0.1488,
+        -0.0741
+      ],
+      "p_value": 0.0001
+    },
+    "cer": {
+      "new": 0.0654,
+      "baseline": 0.0978,
+      "difference": -0.0324,
+      "ci95": [
+        -0.0635,
+        -0.0044
+      ],
+      "p_value": 0.009
+    },
+    "wer_no_diacritics": {
+      "new": 0.1946,
+      "baseline": 0.301,
+      "difference": -0.1064,
+      "ci95": [
+        -0.1451,
+        -0.0686
+      ],
+      "p_value": 0.0001
+    }
+  }
+}

@@ -16,7 +16,7 @@ COE025 Natural Language Processing, Project 3 (automatic speech recognition).
 > GMM-HMM system trained on our training split. Their figures are in
 > [`results/README.md`](results/README.md). The test split has not been
 > touched, FLEURS has been built and committed, and the model of the research question
-> has not been fine-tuned yet. The section
+> has been fine-tuned and scored on the validation split. The section
 > [Status](#status) lists what exists and what is only planned. Every table
 > of numbers in the READMEs is written by `python -m huasr.report` from files
 > that the builders and the scorer generate; no such number is typed by hand.
@@ -473,7 +473,8 @@ refuses the test split. Weights are never stored in this repository: they go
 to `scratch/`, which is not tracked, and the run manifest of the evaluation
 records their SHA-256 and that of the training record.
 
-**How to run it.** On Google Colab with a T4 GPU, open
+**How to run it.** On Google Colab with a GPU of more than 16 GB of memory
+(the committed run used an NVIDIA L4 with 23 GB), open
 [`notebooks/finetune_whisper_small.ipynb`](notebooks/finetune_whisper_small.ipynb)
 and run all cells. It clones this repository, so nothing is uploaded by hand,
 it never uses the test split, and it ends with an archive of the small result
@@ -502,9 +503,11 @@ its GPU build of torch; `requirements.txt` is unchanged. `fetch` is the only
 command that downloads a model, and it checks the weight file against a
 pinned SHA-256. If the clips of an update do not fit in the GPU memory,
 `train --batch-size 8` splits every update into two batches and the record
-says so. The expected time on a T4 is about two hours for the fine-tuning and
-20 to 30 minutes for each evaluation; these are estimates, and the smoke run
-prints a projection measured on the machine.
+says so. The committed run reached a peak of 17.1 GiB of GPU memory with 16
+clips per update, which does not fit a 15 GB T4; on such a card the smaller
+batch is needed, and that is a different setting from the one reported here.
+On the L4 the fine-tuning took 63.5 minutes including the nine validation
+passes; the smoke run prints a projection measured on the machine.
 
 Files of this part:
 

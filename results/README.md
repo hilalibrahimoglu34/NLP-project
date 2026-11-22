@@ -85,6 +85,7 @@ GMM-HMM recipe trained on our training split (see
 | faster-whisper-base | `Systran/faster-whisper-base` at `ebe41f70d5b6` | validation | 826 | 54.41 [49.95, 59.16] | 16.52 [13.59, 20.16] | 52.99 | 0.196 | 771 | 52.66 | 15.05 |
 | faster-whisper-small | `Systran/faster-whisper-small` at `536b0662742c` | validation | 826 | 31.55 [28.01, 36.13] | 10.12 [7.64, 13.82] | 30.64 | 0.259 | 771 | 29.40 | 8.48 |
 | gmm-hmm-mfa | trained here on the training split; no published checkpoint | validation | 826 | 86.85 [86.02, 87.68] | 71.97 [70.70, 73.18] | 86.84 | 0.019 | 771 | 86.54 | 71.64 |
+| hf-whisper-small | `openai/whisper-small` at `973afd24965f` | validation | 826 | 33.65 [27.78, 41.32] | 12.04 [7.36, 19.09] | 32.73 | 0.146 | 771 | 31.04 | 9.78 |
 
 Source: `results/baselines/<system>/<split>/scores.json`.
 <!-- end generated -->
@@ -175,14 +176,16 @@ How to read this table and the row of `gmm-hmm-mfa` in the table above:
 ## Our own models
 
 <!-- generated: results-own -->
-_No complete run yet._
+| System | Checkpoint and revision | Split | Clips | WER % [95%] | CER % [95%] | WER % without diacritics | RTF | Clips without English number words | their WER % | their CER % |
+|---|---|---|---|---|---|---|---|---|---|---|
+| hf-whisper-small-finetuned | `openai/whisper-small` at `973afd24965f`, fine-tuned on the training split (step 1500 of 2000) | validation | 826 | 22.06 [17.89, 27.28] | 8.35 [5.11, 12.94] | 21.64 | 0.140 | 771 | 19.93 | 6.54 |
 
 Source: `results/own/<system>/<split>/scores.json`.
 <!-- end generated -->
 
 ### Whisper small, fine-tuned
 
-Not run yet (21 November 2026). `hf-whisper-small-finetuned` is
+Run on 22 November 2026 on Google Colab (NVIDIA L4). `hf-whisper-small-finetuned` is
 `openai/whisper-small` after `python -m huasr.finetune train`. The main README
 has the clips it is trained on, the settings and the commands
 ([Fine-tuning Whisper small](../README.md#fine-tuning-whisper-small-our-own-model)).
