@@ -1023,8 +1023,10 @@ references, measures exact per-clip coverage of in-vocabulary (IV) and
 out-of-vocabulary (OOV) reference-token occurrences in the test predictions,
 and recomputes WER/CER with the project scoring functions. Run
 `python scripts/oov_analysis.py` from the repository root to generate
-`results/oov_analysis.md`. Coverage is descriptive exact-token overlap, not
-a causal estimate of the effect of OOV status.
+`results/oov_analysis.md`. The optional notebook at
+`notebooks/oov_analysis.ipynb` runs the script and displays the report.
+Coverage is descriptive exact-token overlap, not a causal estimate of the
+effect of OOV status.
 
 ## Status
 
