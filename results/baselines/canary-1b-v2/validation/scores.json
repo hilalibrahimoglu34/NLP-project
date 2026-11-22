@@ -1,0 +1,131 @@
+{
+  "system": "canary-1b-v2",
+  "group": "baselines",
+  "split": "validation",
+  "final_test": false,
+  "complete": true,
+  "checkpoint": {
+    "repository": "nvidia/canary-1b-v2",
+    "revision": "d455706339a6b32e1aa40f82c713a482a0c938e2",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 3916173816,
+    "weights_sha256": "4f6d381f6a939b95e9f8516212148b701e9b3805d26462c4c3e9e34f3d89b6f8"
+  },
+  "settings": {
+    "implementation": "transformers CanaryForConditionalGeneration",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "float32",
+    "source_language": "hu",
+    "target_language": "hu",
+    "punctuation": true,
+    "task": "transcription (source and target language are the same)",
+    "decoding": "greedy, as the generation config of the checkpoint sets it",
+    "max_new_tokens": "the positions of the decoder that the prompt leaves free",
+    "window_seconds": 40,
+    "longer_audio": "cut into the fewest equal parts of at most one window; texts joined",
+    "text": "decoded tokens without special tokens; no other change",
+    "fine_tuned": false
+  },
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "interval": "95% percentile bootstrap over speakers",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 826,
+    "clips_with_empty_reference": 0,
+    "speakers": 15,
+    "audio_seconds": 8996.458,
+    "processing_seconds": 454.178,
+    "rtf": 0.0505,
+    "empty_hypotheses": 2,
+    "wer": {
+      "rate": 0.1059,
+      "ci95": [
+        0.0789,
+        0.1477
+      ],
+      "substitutions": 1137,
+      "deletions": 481,
+      "insertions": 304,
+      "reference_units": 18145
+    },
+    "cer": {
+      "rate": 0.0496,
+      "ci95": [
+        0.0282,
+        0.0855
+      ],
+      "substitutions": 1974,
+      "deletions": 3144,
+      "insertions": 1497,
+      "reference_units": 133314
+    },
+    "wer_no_diacritics": {
+      "rate": 0.1047,
+      "ci95": [
+        0.0777,
+        0.1462
+      ],
+      "substitutions": 1115,
+      "deletions": 481,
+      "insertions": 304,
+      "reference_units": 18145
+    }
+  },
+  "clips_with_english_number_words": 55,
+  "without_english_number_words": {
+    "clips": 771,
+    "clips_with_empty_reference": 0,
+    "speakers": 15,
+    "audio_seconds": 8117.813,
+    "processing_seconds": 412.574,
+    "rtf": 0.0508,
+    "empty_hypotheses": 2,
+    "wer": {
+      "rate": 0.084,
+      "ci95": [
+        0.0711,
+        0.1001
+      ],
+      "substitutions": 821,
+      "deletions": 288,
+      "insertions": 259,
+      "reference_units": 16283
+    },
+    "cer": {
+      "rate": 0.0332,
+      "ci95": [
+        0.0234,
+        0.0466
+      ],
+      "substitutions": 911,
+      "deletions": 1795,
+      "insertions": 1280,
+      "reference_units": 120012
+    },
+    "wer_no_diacritics": {
+      "rate": 0.0828,
+      "ci95": [
+        0.07,
+        0.0988
+      ],
+      "substitutions": 801,
+      "deletions": 288,
+      "insertions": 259,
+      "reference_units": 16283
+    }
+  }
+}

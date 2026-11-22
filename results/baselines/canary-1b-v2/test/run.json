@@ -1,0 +1,64 @@
+{
+  "system": "canary-1b-v2",
+  "group": "baselines",
+  "checkpoint": {
+    "repository": "nvidia/canary-1b-v2",
+    "revision": "d455706339a6b32e1aa40f82c713a482a0c938e2",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 3916173816,
+    "weights_sha256": "4f6d381f6a939b95e9f8516212148b701e9b3805d26462c4c3e9e34f3d89b6f8"
+  },
+  "settings": {
+    "implementation": "transformers CanaryForConditionalGeneration",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "float32",
+    "source_language": "hu",
+    "target_language": "hu",
+    "punctuation": true,
+    "task": "transcription (source and target language are the same)",
+    "decoding": "greedy, as the generation config of the checkpoint sets it",
+    "max_new_tokens": "the positions of the decoder that the prompt leaves free",
+    "window_seconds": 40,
+    "longer_audio": "cut into the fewest equal parts of at most one window; texts joined",
+    "text": "decoded tokens without special tokens; no other change",
+    "fine_tuned": false
+  },
+  "seed": 0,
+  "split": "test",
+  "final_test": true,
+  "data": {
+    "clean_manifest": "data/clean/voxpopuli/manifest.csv",
+    "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+    "raw_manifest_sha256": "d2400e42d5a226ebba5fcedf0755fc29627dc07bfc264af867aecd1b8e96d187",
+    "reference_column": "reference",
+    "clips_in_split": 897
+  },
+  "clips": 897,
+  "limit": null,
+  "complete": true,
+  "audio_seconds": 8684.406,
+  "processing_seconds": 442.447,
+  "load_seconds": 4.906,
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "packages": {
+    "python": "3.13.16",
+    "numpy": "2.5.4",
+    "av": "19.0.1",
+    "huasr": "0.1.0",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.23.0",
+    "tokenizers": "0.23.3",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.33.0"
+  },
+  "started_utc": "2026-11-22T06:33:18Z",
+  "finished_utc": "2026-11-22T06:40:52Z"
+}

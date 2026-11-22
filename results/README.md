@@ -82,15 +82,21 @@ GMM-HMM recipe trained on our training split (see
 <!-- generated: results-baselines -->
 | System | Checkpoint and revision | Split | Clips | WER % [95%] | CER % [95%] | WER % without diacritics | RTF | Clips without English number words | their WER % | their CER % |
 |---|---|---|---|---|---|---|---|---|---|---|
+| canary-1b-v2 | `nvidia/canary-1b-v2` at `d455706339a6` | validation | 826 | 10.59 [7.89, 14.77] | 4.96 [2.82, 8.55] | 10.47 | 0.051 | 771 | 8.40 | 3.32 |
 | faster-whisper-base | `Systran/faster-whisper-base` at `ebe41f70d5b6` | validation | 826 | 54.41 [49.95, 59.16] | 16.52 [13.59, 20.16] | 52.99 | 0.196 | 771 | 52.66 | 15.05 |
 | faster-whisper-small | `Systran/faster-whisper-small` at `536b0662742c` | validation | 826 | 31.55 [28.01, 36.13] | 10.12 [7.64, 13.82] | 30.64 | 0.259 | 771 | 29.40 | 8.48 |
 | gmm-hmm-mfa | trained here on the training split; no published checkpoint | validation | 826 | 86.85 [86.02, 87.68] | 71.97 [70.70, 73.18] | 86.84 | 0.019 | 771 | 86.54 | 71.64 |
 | hf-whisper-small | `openai/whisper-small` at `973afd24965f` | validation | 826 | 33.65 [27.78, 41.32] | 12.04 [7.36, 19.09] | 32.73 | 0.146 | 771 | 31.04 | 9.78 |
+| parakeet-tdt-0.6b-v3 | `nvidia/parakeet-tdt-0.6b-v3` at `541d1f99c6b0` | validation | 826 | 19.39 [10.61, 32.87] | 9.63 [3.36, 18.85] | 19.23 | 0.019 | 771 | 17.79 | 8.44 |
+| qwen3-asr-1.7b | `Qwen/Qwen3-ASR-1.7B-hf` at `bcd2b5b7f32b` | validation | 826 | 32.09 [24.96, 42.17] | 14.39 [8.66, 22.81] | 31.33 | 0.288 | 771 | 30.10 | 12.73 |
 | wav2vec2-xlsr-53-hungarian | `jonatasgrosman/wav2vec2-large-xlsr-53-hungarian` at `2bd0786e71ca` | validation | 826 | 49.40 [46.35, 52.76] | 13.38 [11.04, 16.90] | 47.55 | 0.006 | 771 | 48.01 | 11.85 |
+| canary-1b-v2 | `nvidia/canary-1b-v2` at `d455706339a6` | test | 897 | 9.12 [8.16, 10.10] | 3.77 [3.04, 4.59] | 8.97 | 0.051 | 862 | 8.47 | 3.29 |
 | faster-whisper-base | `Systran/faster-whisper-base` at `ebe41f70d5b6` | test | 897 | 52.05 [50.30, 53.98] | 15.03 [14.00, 16.11] | 50.47 | 0.209 | 862 | 51.66 | 14.58 |
 | faster-whisper-small | `Systran/faster-whisper-small` at `536b0662742c` | test | 897 | 29.43 [27.70, 31.31] | 8.53 [7.52, 9.65] | 28.54 | 0.279 | 862 | 28.91 | 7.99 |
 | gmm-hmm-mfa | trained here on the training split; no published checkpoint | test | 897 | 87.88 [87.10, 88.61] | 71.53 [70.77, 72.20] | 87.85 | 0.021 | 862 | 87.73 | 71.41 |
 | hf-whisper-small | `openai/whisper-small` at `973afd24965f` | test | 897 | 29.60 [27.88, 31.63] | 9.14 [7.68, 11.06] | 28.63 | 0.141 | 862 | 29.11 | 8.70 |
+| parakeet-tdt-0.6b-v3 | `nvidia/parakeet-tdt-0.6b-v3` at `541d1f99c6b0` | test | 897 | 21.90 [10.65, 45.98] | 9.74 [3.74, 21.21] | 21.65 | 0.020 | 862 | 21.92 | 9.62 |
+| qwen3-asr-1.7b | `Qwen/Qwen3-ASR-1.7B-hf` at `bcd2b5b7f32b` | test | 897 | 28.02 [24.54, 32.91] | 12.42 [8.91, 17.25] | 27.27 | 0.286 | 862 | 25.66 | 10.37 |
 | wav2vec2-xlsr-53-hungarian | `jonatasgrosman/wav2vec2-large-xlsr-53-hungarian` at `2bd0786e71ca` | test | 897 | 46.87 [44.22, 49.50] | 11.70 [10.61, 12.85] | 45.16 | 0.006 | 862 | 46.42 | 11.29 |
 
 Source: `results/baselines/<system>/<split>/scores.json`.

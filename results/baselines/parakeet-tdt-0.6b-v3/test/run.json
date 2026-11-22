@@ -1,0 +1,60 @@
+{
+  "system": "parakeet-tdt-0.6b-v3",
+  "group": "baselines",
+  "checkpoint": {
+    "repository": "nvidia/parakeet-tdt-0.6b-v3",
+    "revision": "541d1f99c6b0c3cd0b11a95167540bb8edefd82b",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 2508311120,
+    "weights_sha256": "3a2026366188c8c68598edbbff92f8d11590a08e0ae2e6775544e7b07d6a5e11"
+  },
+  "settings": {
+    "implementation": "transformers ParakeetForTDT",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "float32",
+    "language": "detected by the model; it takes no language setting",
+    "decoding": "greedy TDT, as the checkpoint sets it",
+    "window_seconds": null,
+    "longer_audio": "the whole clip is given to the model at once",
+    "text": "decoded tokens without special tokens; no other change",
+    "fine_tuned": false
+  },
+  "seed": 0,
+  "split": "test",
+  "final_test": true,
+  "data": {
+    "clean_manifest": "data/clean/voxpopuli/manifest.csv",
+    "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+    "raw_manifest_sha256": "d2400e42d5a226ebba5fcedf0755fc29627dc07bfc264af867aecd1b8e96d187",
+    "reference_column": "reference",
+    "clips_in_split": 897
+  },
+  "clips": 897,
+  "limit": null,
+  "complete": true,
+  "audio_seconds": 8684.406,
+  "processing_seconds": 170.28,
+  "load_seconds": 3.95,
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "packages": {
+    "python": "3.13.16",
+    "numpy": "2.5.4",
+    "av": "19.0.1",
+    "huasr": "0.1.0",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.23.0",
+    "tokenizers": "0.23.3",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.33.0"
+  },
+  "started_utc": "2026-11-22T06:44:58Z",
+  "finished_utc": "2026-11-22T06:47:59Z"
+}

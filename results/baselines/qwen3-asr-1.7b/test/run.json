@@ -1,0 +1,63 @@
+{
+  "system": "qwen3-asr-1.7b",
+  "group": "baselines",
+  "checkpoint": {
+    "repository": "Qwen/Qwen3-ASR-1.7B-hf",
+    "revision": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 4076193080,
+    "weights_sha256": "2db53c7d81bd9b8cbc6a074e89be2c968a0d373fb4ee68bb1b1e14f7042dfee1"
+  },
+  "settings": {
+    "implementation": "transformers Qwen3ASRForConditionalGeneration",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "bfloat16",
+    "language": "Hungarian",
+    "language_forced_by": "language Hungarian<asr_text>",
+    "context": null,
+    "decoding": "greedy, as the generation config of the checkpoint sets it",
+    "max_new_tokens": 1024,
+    "window_seconds": null,
+    "longer_audio": "the whole clip is given to the model at once",
+    "text": "decoded tokens without special tokens; no other change",
+    "fine_tuned": false
+  },
+  "seed": 0,
+  "split": "test",
+  "final_test": true,
+  "data": {
+    "clean_manifest": "data/clean/voxpopuli/manifest.csv",
+    "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+    "raw_manifest_sha256": "d2400e42d5a226ebba5fcedf0755fc29627dc07bfc264af867aecd1b8e96d187",
+    "reference_column": "reference",
+    "clips_in_split": 897
+  },
+  "clips": 897,
+  "limit": null,
+  "complete": true,
+  "audio_seconds": 8684.406,
+  "processing_seconds": 2487.738,
+  "load_seconds": 5.191,
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "packages": {
+    "python": "3.13.16",
+    "numpy": "2.5.4",
+    "av": "19.0.1",
+    "huasr": "0.1.0",
+    "torch": "2.14.1+cu130",
+    "transformers": "5.23.0",
+    "tokenizers": "0.23.3",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.33.0"
+  },
+  "started_utc": "2026-11-22T07:32:48Z",
+  "finished_utc": "2026-11-22T08:14:27Z"
+}

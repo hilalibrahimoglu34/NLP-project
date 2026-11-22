@@ -1,0 +1,130 @@
+{
+  "system": "qwen3-asr-1.7b",
+  "group": "baselines",
+  "split": "validation",
+  "final_test": false,
+  "complete": true,
+  "checkpoint": {
+    "repository": "Qwen/Qwen3-ASR-1.7B-hf",
+    "revision": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
+    "weights_file": "model.safetensors",
+    "weights_bytes": 4076193080,
+    "weights_sha256": "2db53c7d81bd9b8cbc6a074e89be2c968a0d373fb4ee68bb1b1e14f7042dfee1"
+  },
+  "settings": {
+    "implementation": "transformers Qwen3ASRForConditionalGeneration",
+    "device": "cuda",
+    "gpu": "NVIDIA L4",
+    "gpu_memory_bytes": 23659151360,
+    "cuda": "13.0",
+    "dtype": "bfloat16",
+    "language": "Hungarian",
+    "language_forced_by": "language Hungarian<asr_text>",
+    "context": null,
+    "decoding": "greedy, as the generation config of the checkpoint sets it",
+    "max_new_tokens": 1024,
+    "window_seconds": null,
+    "longer_audio": "the whole clip is given to the model at once",
+    "text": "decoded tokens without special tokens; no other change",
+    "fine_tuned": false
+  },
+  "hardware": {
+    "processor": "Intel(R) Xeon(R) CPU @ 2.20GHz",
+    "machine": "x86_64",
+    "logical_cpus": 12,
+    "system": "Linux-6.6.159+-x86_64-with-glibc2.39"
+  },
+  "clean_manifest_sha256": "045cf81225a94fb2af2261c7ee698173b6adae7a281c9d2946a690266b79ea26",
+  "scoring": {
+    "policy": "huasr.text.normalize on reference and hypothesis",
+    "rates": "corpus level",
+    "interval": "95% percentile bootstrap over speakers",
+    "resamples": 10000,
+    "seed": 0
+  },
+  "all_clips": {
+    "clips": 826,
+    "clips_with_empty_reference": 0,
+    "speakers": 15,
+    "audio_seconds": 8996.458,
+    "processing_seconds": 2589.305,
+    "rtf": 0.2878,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.3209,
+      "ci95": [
+        0.2496,
+        0.4217
+      ],
+      "substitutions": 3715,
+      "deletions": 658,
+      "insertions": 1449,
+      "reference_units": 18145
+    },
+    "cer": {
+      "rate": 0.1439,
+      "ci95": [
+        0.0866,
+        0.2281
+      ],
+      "substitutions": 6867,
+      "deletions": 3965,
+      "insertions": 8357,
+      "reference_units": 133314
+    },
+    "wer_no_diacritics": {
+      "rate": 0.3133,
+      "ci95": [
+        0.2422,
+        0.4141
+      ],
+      "substitutions": 3576,
+      "deletions": 659,
+      "insertions": 1450,
+      "reference_units": 18145
+    }
+  },
+  "clips_with_english_number_words": 55,
+  "without_english_number_words": {
+    "clips": 771,
+    "clips_with_empty_reference": 0,
+    "speakers": 15,
+    "audio_seconds": 8117.813,
+    "processing_seconds": 2326.186,
+    "rtf": 0.2866,
+    "empty_hypotheses": 0,
+    "wer": {
+      "rate": 0.301,
+      "ci95": [
+        0.2438,
+        0.3747
+      ],
+      "substitutions": 3086,
+      "deletions": 558,
+      "insertions": 1257,
+      "reference_units": 16283
+    },
+    "cer": {
+      "rate": 0.1273,
+      "ci95": [
+        0.0816,
+        0.1883
+      ],
+      "substitutions": 4892,
+      "deletions": 3198,
+      "insertions": 7188,
+      "reference_units": 120012
+    },
+    "wer_no_diacritics": {
+      "rate": 0.2933,
+      "ci95": [
+        0.2366,
+        0.3664
+      ],
+      "substitutions": 2958,
+      "deletions": 559,
+      "insertions": 1258,
+      "reference_units": 16283
+    }
+  }
+}
